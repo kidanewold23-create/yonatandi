@@ -465,8 +465,9 @@ async function generateCertificatePdf(name: string, regDate: string, finishDate:
 
   const fontRegularBytes = await getFontRegular();
   const fontBoldBytes = await getFontBold();
-  const bgBytes = await Deno.readFile(new URL("./certificate_border.jpg", import.meta.url));
-  const logoBytes = await Deno.readFile(new URL("./IMG_0892.PNG", import.meta.url));
+  const { logoBase64, borderBase64 } = await import('./assets.ts');
+  const bgBytes = Uint8Array.from(atob(borderBase64), c => c.charCodeAt(0));
+  const logoBytes = Uint8Array.from(atob(logoBase64), c => c.charCodeAt(0));
 
   return new Promise((resolve) => {
     const doc = new PDFDocument({ layout: "landscape", size: "A4", margin: 0 });
