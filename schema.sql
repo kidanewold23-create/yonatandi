@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS registrations (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     chat_id BIGINT NOT NULL,
     name TEXT,
+    name2 TEXT,
     phone TEXT,
     receipt_number TEXT,
     receipt_image_url TEXT,
