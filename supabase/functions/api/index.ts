@@ -501,11 +501,11 @@ async function generateCertificatePdf(name: string, regDate: string, finishDate:
 
     // 1. Institution Name (Amharic)
     doc.fillColor(forestGreen).font(ethFont(true)).fontSize(31)
-       .text("ፋውንደርስ አካዳሚ የእደጥበብ ሙያዎች ማሰልጠኛ ተቋም", 150, 30, { align: "center", width: 630 });
+       .text("ፋውንደርስ አካዳሚ", 150, 30, { align: "center", width: 630 });
 
     // 3. Institution Name (English)
     doc.fillColor(forestGreen).font(latFont(true)).fontSize(25)
-       .text("FOUNDERS ACADEMY HANDCRAFTS SCHOOL", 150, 65, { align: "center", width: 630 });
+       .text("FOUNDERS ACADEMY", 150, 65, { align: "center", width: 630 });
 
     // 4. Certificate Title (Amharic)
     doc.fillColor(forestGreen).font(ethFont(true)).fontSize(24)
@@ -535,8 +535,8 @@ async function generateCertificatePdf(name: string, regDate: string, finishDate:
        .text(name, lx + 40, 208, { width: lw - 40, align: "center" });
     doc.moveTo(lx + 35, 224).lineTo(lx + lw, 224).strokeColor(forestGreen).lineWidth(1).stroke();
 
-    // Line 2: በፋውንደርስ አካዳሚ የእደጥበብ ማሰልጠኛ ተቋም _____
-    doc.fillColor(forestGreen).font(ethFont(false)).fontSize(11).text("በፋውንደርስ አካዳሚ የእደጥበብ ማሰልጠኛ ተቋም", lx, 246);
+    // Line 2: በፋውንደርስ አካዳሚ _____
+    doc.fillColor(forestGreen).font(ethFont(false)).fontSize(11).text("በፋውንደርስ አካዳሚ", lx, 246);
     doc.moveTo(lx + 215, 258).lineTo(lx + lw, 258).strokeColor(forestGreen).lineWidth(1).stroke();
     doc.fillColor(forestGreen).font(autoFont(durationAm, true)).fontSize(11)
        .text(durationAm, lx + 215, 244, { width: lw - 215, align: "center" });
