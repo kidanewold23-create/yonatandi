@@ -591,18 +591,18 @@ async function generateCertificatePdf(name, regDate, finishDate, name2) {
     const signatureBase64 = settings.signature_base64 || "";
     const sealBase64 = settings.seal_base64 || "";
 
-    let logoPath = path.join(__dirname, 'IMG_0892.PNG');
+    let logoPath = path.join(__dirname, 'IMG_0892.png');
     if (!fs.existsSync(logoPath)) {
-        logoPath = path.join(process.cwd(), 'api', 'IMG_0892.PNG');
+        logoPath = path.join(process.cwd(), 'api', 'IMG_0892.png');
     }
     if (!fs.existsSync(logoPath)) {
-        logoPath = path.join(process.cwd(), 'IMG_0892.PNG');
+        logoPath = path.join(process.cwd(), 'IMG_0892.png');
     }
     let logoBase64 = "";
     if (fs.existsSync(logoPath)) {
         logoBase64 = "data:image/png;base64," + fs.readFileSync(logoPath, 'base64');
     }
-    html = html.replace('C:\\Users\\Administrator\\Desktop\\Projects\\founders_academy\\IMG_0892.PNG', logoBase64);
+    html = html.replace('C:\\Users\\Administrator\\Desktop\\Projects\\yonatan\\api\\IMG_0892.png', logoBase64);
 
     const printStyles = `
         <style>
@@ -2932,12 +2932,12 @@ app.get('/api/certificate', async (req, res) => {
     const signatureBase64 = settings.signature_base64 || "";
     const sealBase64 = settings.seal_base64 || "";
 
-    const logoPath = path.join(__dirname, 'IMG_0892.PNG');
+    const logoPath = path.join(__dirname, 'IMG_0892.png');
     let logoBase64 = "";
     if (fs.existsSync(logoPath)) {
         logoBase64 = "data:image/png;base64," + fs.readFileSync(logoPath, 'base64');
     }
-    html = html.replace('C:\\Users\\Administrator\\Desktop\\Projects\\founders_academy\\IMG_0892.PNG', logoBase64);
+    html = html.replace('C:\\Users\\Administrator\\Desktop\\Projects\\yonatan\\api\\IMG_0892.png', logoBase64);
 
     html = html.replace(
         '<div class="fill-blank-line" style="width: 88%; margin-left: 10px;"></div>',
