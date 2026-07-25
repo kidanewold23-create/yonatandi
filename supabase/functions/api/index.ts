@@ -678,8 +678,7 @@ async function checkAndApplyReferralReward(referrerChatId: number) {
       const { data: settings } = await supabase.from("admins").select("verification_code").eq("username", "payment_settings").maybeSingle();
       const sDict = settings && settings.verification_code ? JSON.parse(settings.verification_code) : {};
       const channelId = sDict.telegram_channel_id || TELEGRAM_CHANNEL_ID || "-1003789578749";
-
-      const groupId = sDict.telegram_group_id || "";
+      const groupId = sDict.telegram_group_id || "-1004377079119";
 
       // Unban user first in case they were previously banned/expired
       const groupsToUnban = [];
@@ -981,8 +980,7 @@ async function handleRequest(req: Request): Promise<Response> {
             const { data: settings } = await supabase.from("admins").select("verification_code").eq("username", "payment_settings").maybeSingle();
             const sDict = settings && settings.verification_code ? JSON.parse(settings.verification_code) : {};
             const channelId = sDict.telegram_channel_id || TELEGRAM_CHANNEL_ID || "-1003789578749";
-
-            const groupId = sDict.telegram_group_id || "";
+            const groupId = sDict.telegram_group_id || "-1004377079119";
 
             // Unban user first in case they were previously banned/expired
             const groupsToUnban = [];

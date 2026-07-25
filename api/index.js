@@ -377,7 +377,7 @@ async function generateApprovedInviteLinks(chatId, regName, lang = "en") {
     const durationDays = parseInt(settings.access_duration_days) || 30;
     const expireDate = Math.floor(Date.now() / 1000) + Math.max(1, durationDays) * 24 * 3600;
 
-    const groupId = settings.telegram_group_id || "";
+    const groupId = settings.telegram_group_id || "-1004377079119";
 
     // Unban user first in case they were previously banned/expired
     if (chatId) {
