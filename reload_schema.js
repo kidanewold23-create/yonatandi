@@ -1,5 +1,5 @@
 const { Client } = require('pg');
-const DB_URL = "postgresql://postgres:Dl1gdEE4ekuJK1EO@db.pgnxsgysnvrgsbuecesc.supabase.co:6543/postgres";
+const DB_URL = "postgresql://postgres:[YOUR-PASSWORD]@db.yrelqbvkxwdkzaraydfz.supabase.co:5432/postgres";
 
 async function reloadSchema() {
     const client = new Client({

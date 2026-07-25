@@ -22,9 +22,9 @@ const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID;
 const ADMIN_CHAT_ID = process.env.ADMIN_CHAT_ID;
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
-const JWT_SECRET = process.env.JWT_SECRET || "super-secret-founders-academy-token-key-12345!";
-const SUPABASE_URL = (process.env.SUPABASE_URL || "https://pgnxsgysnvrgsbuecesc.supabase.co").replace(/\/$/, "");
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || (process.env.SUPABASE_KEY && process.env.SUPABASE_KEY !== "sb_publishable_GhwTyM1ilJr0M2VbusxDPQ_5wA9LycM" ? process.env.SUPABASE_KEY : "sb_publishable_i1qSlBg5OBbnLpSHuDN4UA_bH6bWAVQ");
+const JWT_SECRET = process.env.JWT_SECRET || "super-secret-craftopia-token-key-12345!";
+const SUPABASE_URL = (process.env.SUPABASE_URL || "https://yrelqbvkxwdkzaraydfz.supabase.co").replace(/\/$/, "");
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || (process.env.SUPABASE_KEY && process.env.SUPABASE_KEY !== "sb_publishable_GhwTyM1ilJr0M2VbusxDPQ_5wA9LycM" ? process.env.SUPABASE_KEY : "sb_publishable_ZIfc-LO2UBt8CPVdY-WUgQ_U_WGF8T3");
 
 const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_TOKEN}`;
 let BOT_USERNAME = null;
@@ -154,7 +154,7 @@ async function getBotUsername() {
         BOT_USERNAME = res.result.username;
         return BOT_USERNAME;
     }
-    return "foundersacademybot";
+    return "CraftopiaBot";
 }
 
 async function setupBotCommands() {
@@ -1294,7 +1294,7 @@ app.post('/api/admin/generate-link-code', requireAuth, async (req, res) => {
 app.get('/api/admin/force-schema-reload', async (req, res) => {
     let DB_URL = process.env.DATABASE_URL;
     if (!DB_URL) {
-        const supabaseUrl = process.env.SUPABASE_URL || "https://pgnxsgysnvrgsbuecesc.supabase.co";
+        const supabaseUrl = process.env.SUPABASE_URL || "https://yrelqbvkxwdkzaraydfz.supabase.co";
         const dbPassword = process.env.DB_PASSWORD || "Dl1gdEE4ekuJK1EO";
         const host = supabaseUrl.replace(/^https?:\/\//, "").replace(/\/$/, "");
         DB_URL = `postgresql://postgres:${dbPassword}@db.${host}:6543/postgres`;
@@ -1501,7 +1501,7 @@ app.post('/api/translations', requireAuth, async (req, res) => {
 // Schema migration runner
 app.all('/api/admin/migrate', async (req, res) => {
     const secret = req.query.secret;
-    if (secret !== "super-secret-founders-academy-token-key-12345!") {
+    if (secret !== "super-secret-craftopia-token-key-12345!") {
         return res.status(401).json({ error: "Unauthorized" });
     }
         
@@ -1597,8 +1597,8 @@ app.all('/api/admin/migrate', async (req, res) => {
 
             // Schedule cron to run every minute
             // The Edge Function throttles sends to 24h via last_completed_at
-            const supabaseAnonKey = process.env.SUPABASE_KEY || "sb_publishable_i1qSlBg5OBbnLpSHuDN4UA_bH6bWAVQ";
-            const supabaseProjectUrl = (process.env.SUPABASE_URL || "https://pgnxsgysnvrgsbuecesc.supabase.co").replace(/\/$/, "");
+            const supabaseAnonKey = process.env.SUPABASE_KEY || "sb_publishable_ZIfc-LO2UBt8CPVdY-WUgQ_U_WGF8T3";
+            const supabaseProjectUrl = (process.env.SUPABASE_URL || "https://yrelqbvkxwdkzaraydfz.supabase.co").replace(/\/$/, "");
             await client.query(`
                 SELECT cron.schedule(
                     'craftopia-send-daily-quiz',
@@ -1641,7 +1641,7 @@ app.all('/api/cron/send_daily_quiz', async (req, res) => {
     try {
         console.log("[Cron Proxy] Forwarding cron trigger to Deno Edge Function...");
         const queryParams = new URL(req.url, `http://${req.headers.host || 'localhost'}`).search;
-        const response = await axios.post(`https://pgnxsgysnvrgsbuecesc.supabase.co/functions/v1/api/cron/send_daily_quiz${queryParams}`, {}, {
+        const response = await axios.post(`https://yrelqbvkxwdkzaraydfz.supabase.co/functions/v1/api/cron/send_daily_quiz${queryParams}`, {}, {
             headers: {
                 "Authorization": `Bearer ${process.env.SUPABASE_KEY || ""}`
             },
@@ -1901,15 +1901,15 @@ app.post('/api/bot', async (req, res) => {
                         const amount = settings.amount || "500";
                         let msg;
                         if (currentStep.includes("telebirr")) {
-                            const accName = settings.telebirr_name || "Founders Academy";
-                            const accNum = settings.telebirr_number || "";
+                            const accName = settings.telebirr_name || "Craftopia School";
+                            const accNum = settings.telebirr_number || "0911223344";
                             msg = getMsg(lang, "telebirr_payment_instructions").replace("{amount}", amount).replace("{acc_name}", accName).replace("{acc_num}", accNum);
                         } else if (currentStep.includes("abyssinia")) {
-                            const accName = settings.abyssinia_name || "Founders Academy";
-                            const accNum = settings.abyssinia_number || "";
+                            const accName = settings.abyssinia_name || "Craftopia BoA";
+                            const accNum = settings.abyssinia_number || "987654321";
                             msg = getMsg(lang, "abyssinia_payment_instructions").replace("{amount}", amount).replace("{acc_name}", accName).replace("{acc_num}", accNum);
                         } else {
-                            const accName = settings.cbe_name || "Founders Academy";
+                            const accName = settings.cbe_name || "Craftopia Hand Craft";
                             const accNum = settings.cbe_number || "1000123456789";
                             msg = getMsg(lang, "cbe_payment_instructions").replace("{amount}", amount).replace("{acc_name}", accName).replace("{acc_num}", accNum);
                         }
@@ -2165,17 +2165,17 @@ app.post('/api/bot', async (req, res) => {
                 
                 let msg;
                 if (callbackData === "pay_telebirr") {
-                    const accName = settings.telebirr_name || "Founders Academy";
-                    const accNum = settings.telebirr_number || "";
+                    const accName = settings.telebirr_name || "Craftopia School";
+                    const accNum = settings.telebirr_number || "0911223344";
                     msg = getMsg(lang, "telebirr_payment_instructions").replace("{amount}", amount).replace("{acc_name}", accName).replace("{acc_num}", accNum);
                     await db.upsertRegistration(chatId, { step: buildStep(lang, "awaiting_receipt_telebirr") });
                 } else if (callbackData === "pay_abyssinia") {
-                    const accName = settings.abyssinia_name || "Founders Academy";
-                    const accNum = settings.abyssinia_number || "";
+                    const accName = settings.abyssinia_name || "Craftopia BoA";
+                    const accNum = settings.abyssinia_number || "987654321";
                     msg = getMsg(lang, "abyssinia_payment_instructions").replace("{amount}", amount).replace("{acc_name}", accName).replace("{acc_num}", accNum);
                     await db.upsertRegistration(chatId, { step: buildStep(lang, "awaiting_receipt_abyssinia") });
                 } else {
-                    const accName = settings.cbe_name || "Founders Academy";
+                    const accName = settings.cbe_name || "Craftopia Hand Craft";
                     const accNum = settings.cbe_number || "1000123456789";
                     msg = getMsg(lang, "cbe_payment_instructions").replace("{amount}", amount).replace("{acc_name}", accName).replace("{acc_num}", accNum);
                     await db.upsertRegistration(chatId, { step: buildStep(lang, "awaiting_receipt_cbe") });
@@ -2978,7 +2978,7 @@ app.get('/api/certificate', async (req, res) => {
             const element = document.querySelector('.certificate-canvas');
             const opt = {
                 margin: 0,
-                filename: `Founders_Academy_Certificate_${name.replace(/\s+/g, '_')}.pdf`,
+                filename: 'Craftopia_Certificate_${name.replace(/\\s+/g, '_')}.pdf',
                 image: { type: 'jpeg', quality: 1 },
                 html2canvas: { scale: 2, useCORS: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }

@@ -1,7 +1,7 @@
 const { Client } = require('pg');
 
 async function testSetAdminTelegramLinkCode(username, code, expiresAtIso) {
-    let DB_URL = process.env.DATABASE_URL || "postgresql://postgres:Dl1gdEE4ekuJK1EO@db.pgnxsgysnvrgsbuecesc.supabase.co:6543/postgres";
+    let DB_URL = process.env.DATABASE_URL || "postgresql://postgres:[YOUR-PASSWORD]@db.yrelqbvkxwdkzaraydfz.supabase.co:5432/postgres";
     const client = new Client({ connectionString: DB_URL, ssl: { rejectUnauthorized: false } });
     
     try {

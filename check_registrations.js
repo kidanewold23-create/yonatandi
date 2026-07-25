@@ -1,6 +1,6 @@
 const axios = require('axios');
-const SUPABASE_URL = "https://pgnxsgysnvrgsbuecesc.supabase.co";
-const SUPABASE_KEY = "sb_publishable_i1qSlBg5OBbnLpSHuDN4UA_bH6bWAVQ";
+const SUPABASE_URL = "https://yrelqbvkxwdkzaraydfz.supabase.co";
+const SUPABASE_KEY = "sb_publishable_ZIfc-LO2UBt8CPVdY-WUgQ_U_WGF8T3";
 
 async function checkQuizProgress() {
     try {

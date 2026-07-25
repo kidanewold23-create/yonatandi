@@ -3,8 +3,8 @@ const axios = require('axios');
 const { MESSAGES: STATIC_MESSAGES } = require('./messages');
 
 
-const SUPABASE_URL = (process.env.SUPABASE_URL && !process.env.SUPABASE_URL.includes("gmvzwakcouuwvbapjtso") ? process.env.SUPABASE_URL : "https://pgnxsgysnvrgsbuecesc.supabase.co").replace(/\/$/, "");
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || (process.env.SUPABASE_KEY && process.env.SUPABASE_KEY !== "sb_publishable_GhwTyM1ilJr0M2VbusxDPQ_5wA9LycM" ? process.env.SUPABASE_KEY : "sb_publishable_i1qSlBg5OBbnLpSHuDN4UA_bH6bWAVQ");
+const SUPABASE_URL = (process.env.SUPABASE_URL && !process.env.SUPABASE_URL.includes("gmvzwakcouuwvbapjtso") ? process.env.SUPABASE_URL : "https://yrelqbvkxwdkzaraydfz.supabase.co").replace(/\/$/, "");
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || (process.env.SUPABASE_KEY && process.env.SUPABASE_KEY !== "sb_publishable_GhwTyM1ilJr0M2VbusxDPQ_5wA9LycM" ? process.env.SUPABASE_KEY : "sb_publishable_ZIfc-LO2UBt8CPVdY-WUgQ_U_WGF8T3");
 
 axios.defaults.timeout = 30000;
 
@@ -549,11 +549,11 @@ async function getPaymentSettings() {
         amount: "500",
         telegram_channel_id: "-1004429840481",
         access_duration_days: "30",
-        telebirr_name: "Founders Academy",
-        telebirr_number: "0911000000",
-        cbe_name: "Founders Academy",
-        cbe_number: "1000000000000",
-        abyssinia_name: "Founders Academy",
+        telebirr_name: "Craftopia School",
+        telebirr_number: "0911223344",
+        cbe_name: "Craftopia Hand Craft",
+        cbe_number: "1000123456789",
+        abyssinia_name: "Craftopia BoA",
         abyssinia_number: "987654321",
         cert_program_en: "Hand Craft & Art",
         cert_program_am: "የእጅ ሥራና ጥበብ ስልጠና",
