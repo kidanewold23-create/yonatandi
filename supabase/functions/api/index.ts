@@ -1581,6 +1581,7 @@ async function handleRequest(req: Request): Promise<Response> {
 
         let receiptNum = text;
         let receiptImg = null;
+        let telegramFileId = null;
 
         if (photo || message.photo_url) {
           if (message.photo_url) {
@@ -1588,6 +1589,7 @@ async function handleRequest(req: Request): Promise<Response> {
             receiptNum = caption || `Sim_REC_${Math.floor(Date.now() / 1000)}`;
           } else {
             const fileId = photo[photo.length - 1].file_id;
+            telegramFileId = fileId;
             const fileInfo = await sendTelegramRequest("getFile", { file_id: fileId });
             if (fileInfo && fileInfo.ok) {
               const downloadUrl = `https://api.telegram.org/file/bot${TELEGRAM_TOKEN}/${fileInfo.result.file_path}`;
@@ -1609,6 +1611,9 @@ async function handleRequest(req: Request): Promise<Response> {
 
                 if (upRes.ok) {
                   receiptImg = `${SUPABASE_URL}/storage/v1/object/public/receipts/${fileName}`;
+                  receiptNum = caption || `Img_${Math.floor(Date.now() / 1000)}`;
+                } else {
+                  console.error("Supabase Storage upload failed. Ensure 'receipts' bucket exists and is public.");
                   receiptNum = caption || `Img_${Math.floor(Date.now() / 1000)}`;
                 }
               }
@@ -1650,8 +1655,9 @@ async function handleRequest(req: Request): Promise<Response> {
             ]]
           };
 
-          if (receiptImg) {
-            await sendTelegramRequest("sendPhoto", { chat_id: adminChat, photo: receiptImg, caption: captionText, parse_mode: "Markdown", reply_markup: adminKb });
+          const photoToSend = telegramFileId || receiptImg;
+          if (photoToSend) {
+            await sendTelegramRequest("sendPhoto", { chat_id: adminChat, photo: photoToSend, caption: captionText, parse_mode: "Markdown", reply_markup: adminKb });
           } else {
             await sendTelegramRequest("sendMessage", { chat_id: adminChat, text: captionText, parse_mode: "Markdown", reply_markup: adminKb });
           }
