@@ -22,6 +22,6 @@ jobs:
           version: latest
 
       - name: Deploy Edge Function
-        run: supabase functions deploy api --project-ref pgnxsgysnvrgsbuecesc
+        run: supabase functions deploy api --project-ref yrelqbvkxwdkzaraydfz
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
