@@ -206,15 +206,19 @@ async function removeUserFromChannel(chatId: number) {
     const { data: settings } = await supabase.from("admins").select("verification_code").eq("username", "payment_settings").maybeSingle();
     const sDict = settings && settings.verification_code ? JSON.parse(settings.verification_code) : {};
     const channelId = sDict.telegram_channel_id || TELEGRAM_CHANNEL_ID || "-1003789578749";
-    console.log(`[Kick] Removing user ${chatId} from channel ${channelId}`);
-    const banRes = await sendTelegramRequest("banChatMember", {
-      chat_id: channelId,
-      user_id: chatId
-    });
-    if (banRes && banRes.ok) {
-      console.log(`[Kick] User ${chatId} successfully banned from channel ${channelId}.`);
-    } else {
-      console.error(`[Kick] Failed to ban user ${chatId} from channel:`, banRes ? banRes.description : "Unknown error");
+    const groupsToBan = [channelId, "-1002347201735", "-5037460334"];
+    
+    for (const groupId of groupsToBan) {
+      console.log(`[Kick] Removing user ${chatId} from chat ${groupId}`);
+      const banRes = await sendTelegramRequest("banChatMember", {
+        chat_id: groupId,
+        user_id: chatId
+      });
+      if (banRes && banRes.ok) {
+        console.log(`[Kick] User ${chatId} successfully banned from chat ${groupId}.`);
+      } else {
+        console.error(`[Kick] Failed to ban user ${chatId} from chat ${groupId}:`, banRes ? banRes.description : "Unknown error");
+      }
     }
   } catch (e: any) {
     console.error(`[Kick] Exception in removeUserFromChannel for user ${chatId}:`, e.message);
