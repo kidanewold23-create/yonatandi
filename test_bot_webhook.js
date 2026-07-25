@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 async function testBot() {
-    const url = 'https://craftoppia.vercel.app/api/bot';
+    const url = 'https://yonatandi.vercel.app/api/bot';
     const payload = {
         update_id: 12345,
         message: {

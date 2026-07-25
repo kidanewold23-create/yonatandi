@@ -1,7 +1,7 @@
 const https = require('https');
 
 const TOKEN = '8906068445:AAGc5L08H9a1Lc0oYIDL9o4ZqjJbLVMII4Y';
-const WEBHOOK_URL = 'https://craftoppia.vercel.app/api/bot';
+const WEBHOOK_URL = 'https://yonatandi.vercel.app/api/bot';
 
 function request(url) {
     return new Promise((resolve, reject) => {
