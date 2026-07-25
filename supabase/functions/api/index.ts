@@ -466,6 +466,7 @@ async function generateCertificatePdf(name: string, regDate: string, finishDate:
   const fontRegularBytes = await getFontRegular();
   const fontBoldBytes = await getFontBold();
   const bgBytes = await Deno.readFile(new URL("./certificate_border.jpg", import.meta.url));
+  const logoBytes = await Deno.readFile(new URL("./IMG_0892.PNG", import.meta.url));
 
   return new Promise((resolve) => {
     const doc = new PDFDocument({ layout: "landscape", size: "A4", margin: 0 });
@@ -497,12 +498,9 @@ async function generateCertificatePdf(name: string, regDate: string, finishDate:
     // ── SECTION 2: Header and Logo (Side-by-Side) ──────────────────────────
     // Logo Emblem (Centred at 110, 95)
     const logoX = 110, logoY = 95;
-    // Spark above green emblem
-    doc.circle(logoX, logoY - 30, 4.5).fillColor(pureGold).fill();
-    // Forest Green stylized glyph
-    doc.circle(logoX, logoY, 19.5).fillColor(forestGreen).fill();
-    doc.circle(logoX, logoY, 13.5).fillColor("#ffffff").fill();
-    doc.circle(logoX, logoY, 6).fillColor(forestGreen).fill();
+    
+    // Draw the actual logo instead of shapes
+    doc.image(logoBytes, logoX - 45, logoY - 45, { width: 90, height: 90 });
 
     // 1. Institution Name (Amharic)
     doc.fillColor(forestGreen).font(ethFont(true)).fontSize(31)
