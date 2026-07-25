@@ -206,10 +206,8 @@ async function removeUserFromChannel(chatId: number) {
     const { data: settings } = await supabase.from("admins").select("verification_code").eq("username", "payment_settings").maybeSingle();
     const sDict = settings && settings.verification_code ? JSON.parse(settings.verification_code) : {};
     const channelId = sDict.telegram_channel_id || TELEGRAM_CHANNEL_ID || "-1003789578749";
-    const groupId = sDict.telegram_group_id || "";
     const groupsToBan = [];
     if (channelId) groupsToBan.push(channelId);
-    if (groupId) groupsToBan.push(groupId);
     
     for (const targetId of groupsToBan) {
       console.log(`[Kick] Removing user ${chatId} from chat ${targetId}`);

@@ -461,10 +461,8 @@ async function removeUserFromChannel(chatId) {
     try {
         const settings = await db.getPaymentSettings();
         const channelId = settings.telegram_channel_id || TELEGRAM_CHANNEL_ID || process.env.TELEGRAM_CHANNEL_ID || "-1003789578749";
-        const groupId = settings.telegram_group_id || "";
         const groupsToBan = [];
         if (channelId) groupsToBan.push(channelId);
-        if (groupId) groupsToBan.push(groupId);
         
         for (const targetId of groupsToBan) {
             console.log(`[Kick] Removing user ${chatId} from chat ${targetId}`);
