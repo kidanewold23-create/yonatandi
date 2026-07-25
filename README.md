@@ -1,6 +1,6 @@
-# Craftopia Bot & Dashboard
+# Founders Academy Bot & Dashboard
 
-This repository contains the backend and frontend for the Craftopia project, including a Telegram bot integrations, registration system, admin dashboard, and database connection.
+This repository contains the backend and frontend for the Founders Academy project, including a Telegram bot integrations, registration system, admin dashboard, and database connection.
 
 The application is fully configured for deployment on **Vercel** as a Serverless Python and HTML application.
 
@@ -21,12 +21,12 @@ This is the easiest and most automated deployment path.
 
 1. Go to [Vercel](https://vercel.com) and log in.
 2. Click **Add New...** -> **Project**.
-3. Select your GitHub repository: `kidanewold1/craft`.
+3. Select your GitHub repository: `kidanewold1/founders_academy`.
 4. Leave the Build and Output settings as default (Vercel automatically detects the configuration from `vercel.json`).
 5. Expand the **Environment Variables** section and add the keys from your `.env.example`:
    - `TELEGRAM_BOT_TOKEN`
    - `TELEGRAM_CHANNEL_ID`
-   - `ADMIN_CHAT_ID`
+   - `ADMIN_FOUNDERS ACADEMYD`
    - `SUPABASE_URL`
    - `SUPABASE_KEY`
    - `ADMIN_USERNAME`

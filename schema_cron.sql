@@ -1,5 +1,5 @@
 -- =============================================================================
--- Supabase Cron Job Setup for Craftopia Daily Quiz
+-- Supabase Cron Job Setup for Founders Academy Daily Quiz
 -- =============================================================================
 -- HOW TO USE:
 --   1. Open Supabase SQL Editor:
@@ -20,8 +20,8 @@ CREATE EXTENSION IF NOT EXISTS pg_net;
 -- 2. Remove existing job if it already exists (safe re-run)
 DO $$
 BEGIN
-  IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'craftopia-send-daily-quiz') THEN
-    PERFORM cron.unschedule('craftopia-send-daily-quiz');
+  IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'founders_academy-send-daily-quiz') THEN
+    PERFORM cron.unschedule('founders_academy-send-daily-quiz');
     RAISE NOTICE 'Existing cron job removed.';
   END IF;
 END $$;
@@ -30,7 +30,7 @@ END $$;
 --    The Edge Function uses last_completed_at to throttle sends to once per 24h.
 --    Running every minute just ensures we never miss a window.
 SELECT cron.schedule(
-  'craftopia-send-daily-quiz',
+  'founders_academy-send-daily-quiz',
   '* * * * *',   -- every minute
   $$
     SELECT net.http_post(
@@ -51,4 +51,4 @@ SELECT
   schedule,
   active
 FROM cron.job
-WHERE jobname = 'craftopia-send-daily-quiz';
+WHERE jobname = 'founders_academy-send-daily-quiz';
