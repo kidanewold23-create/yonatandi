@@ -548,6 +548,7 @@ async function getPaymentSettings() {
     return {
         amount: "500",
         telegram_channel_id: "-1004429840481",
+        telegram_group_id: "",
         access_duration_days: "30",
         telebirr_name: "Founders Academy School",
         telebirr_number: "0911223344",

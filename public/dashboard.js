@@ -317,6 +317,7 @@ async function loadPaymentSettings() {
       const data = await response.json();
       document.getElementById('setAmount').value = data.amount || '';
       document.getElementById('setChannelId').value = data.telegram_channel_id || '';
+      document.getElementById('setGroupId').value = data.telegram_group_id || '';
       document.getElementById('setAccessDuration').value = data.access_duration_days || '30';
       document.getElementById('setTelebirrName').value = data.telebirr_name || '';
       document.getElementById('setTelebirrNumber').value = data.telebirr_number || '';
@@ -364,6 +365,7 @@ document.getElementById('paymentSettingsForm').addEventListener('submit', async 
   const payload = {
     amount: document.getElementById('setAmount').value,
     telegram_channel_id: document.getElementById('setChannelId').value,
+    telegram_group_id: document.getElementById('setGroupId').value,
     access_duration_days: document.getElementById('setAccessDuration').value,
     telebirr_name: document.getElementById('setTelebirrName').value,
     telebirr_number: document.getElementById('setTelebirrNumber').value,

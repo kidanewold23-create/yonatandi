@@ -377,16 +377,23 @@ async function generateApprovedInviteLinks(chatId, regName, lang = "en") {
     const durationDays = parseInt(settings.access_duration_days) || 30;
     const expireDate = Math.floor(Date.now() / 1000) + Math.max(1, durationDays) * 24 * 3600;
 
+    const groupId = settings.telegram_group_id || "";
+
     // Unban user first in case they were previously banned/expired
     if (chatId) {
-        try {
-            await sendTelegramRequest("unbanChatMember", {
-                chat_id: channelId,
-                user_id: chatId,
-                only_if_banned: true
-            });
-        } catch (unbanErr) {
-            console.error(`[Unban] Failed to unban user ${chatId}:`, unbanErr.message);
+        const groupsToUnban = [];
+        if (channelId) groupsToUnban.push(channelId);
+        if (groupId) groupsToUnban.push(groupId);
+        for (const targetId of groupsToUnban) {
+            try {
+                await sendTelegramRequest("unbanChatMember", {
+                    chat_id: targetId,
+                    user_id: chatId,
+                    only_if_banned: true
+                });
+            } catch (unbanErr) {
+                console.error(`[Unban] Failed to unban user ${chatId} from ${targetId}:`, unbanErr.message);
+            }
         }
     }
 
@@ -404,18 +411,20 @@ async function generateApprovedInviteLinks(chatId, regName, lang = "en") {
         console.error("Failed to generate main invite link:", inviteRes1 ? inviteRes1.description : "Unknown error");
     }
 
-    // Generate private group invite link dynamically for group ID -1004377079119
-    const inviteRes2 = await sendTelegramRequest("createChatInviteLink", {
-        chat_id: "-1004377079119",
-        member_limit: 1,
-        name: `Group Link for ${regName || getDefaultStudentName(lang)}`
-    });
-
     let inviteLink2 = "";
-    if (inviteRes2 && inviteRes2.ok) {
-        inviteLink2 = inviteRes2.result.invite_link;
-    } else {
-        console.error("Failed to generate private group invite link:", inviteRes2 ? inviteRes2.description : "Unknown error");
+    if (groupId) {
+        // Generate private group invite link dynamically for group ID
+        const inviteRes2 = await sendTelegramRequest("createChatInviteLink", {
+            chat_id: groupId,
+            member_limit: 1,
+            name: `Group Link for ${regName || getDefaultStudentName(lang)}`
+        });
+
+        if (inviteRes2 && inviteRes2.ok) {
+            inviteLink2 = inviteRes2.result.invite_link;
+        } else {
+            console.error("Failed to generate private group invite link:", inviteRes2 ? inviteRes2.description : "Unknown error");
+        }
     }
 
     let links = [];
@@ -452,18 +461,21 @@ async function removeUserFromChannel(chatId) {
     try {
         const settings = await db.getPaymentSettings();
         const channelId = settings.telegram_channel_id || TELEGRAM_CHANNEL_ID || process.env.TELEGRAM_CHANNEL_ID || "-1003789578749";
-        const groupsToBan = [channelId, "-1002347201735", "-5037460334"];
+        const groupId = settings.telegram_group_id || "";
+        const groupsToBan = [];
+        if (channelId) groupsToBan.push(channelId);
+        if (groupId) groupsToBan.push(groupId);
         
-        for (const groupId of groupsToBan) {
-            console.log(`[Kick] Removing user ${chatId} from chat ${groupId}`);
+        for (const targetId of groupsToBan) {
+            console.log(`[Kick] Removing user ${chatId} from chat ${targetId}`);
             const banRes = await sendTelegramRequest("banChatMember", {
-                chat_id: groupId,
+                chat_id: targetId,
                 user_id: chatId
             });
             if (banRes && banRes.ok) {
-                console.log(`[Kick] User ${chatId} successfully banned from chat ${groupId}.`);
+                console.log(`[Kick] User ${chatId} successfully banned from chat ${targetId}.`);
             } else {
-                console.error(`[Kick] Failed to ban user ${chatId} from chat ${groupId}:`, banRes ? banRes.description : "Unknown error");
+                console.error(`[Kick] Failed to ban user ${chatId} from chat ${targetId}:`, banRes ? banRes.description : "Unknown error");
             }
         }
     } catch (e) {

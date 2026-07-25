@@ -206,18 +206,21 @@ async function removeUserFromChannel(chatId: number) {
     const { data: settings } = await supabase.from("admins").select("verification_code").eq("username", "payment_settings").maybeSingle();
     const sDict = settings && settings.verification_code ? JSON.parse(settings.verification_code) : {};
     const channelId = sDict.telegram_channel_id || TELEGRAM_CHANNEL_ID || "-1003789578749";
-    const groupsToBan = [channelId, "-1002347201735", "-5037460334"];
+    const groupId = sDict.telegram_group_id || "";
+    const groupsToBan = [];
+    if (channelId) groupsToBan.push(channelId);
+    if (groupId) groupsToBan.push(groupId);
     
-    for (const groupId of groupsToBan) {
-      console.log(`[Kick] Removing user ${chatId} from chat ${groupId}`);
+    for (const targetId of groupsToBan) {
+      console.log(`[Kick] Removing user ${chatId} from chat ${targetId}`);
       const banRes = await sendTelegramRequest("banChatMember", {
-        chat_id: groupId,
+        chat_id: targetId,
         user_id: chatId
       });
       if (banRes && banRes.ok) {
-        console.log(`[Kick] User ${chatId} successfully banned from chat ${groupId}.`);
+        console.log(`[Kick] User ${chatId} successfully banned from chat ${targetId}.`);
       } else {
-        console.error(`[Kick] Failed to ban user ${chatId} from chat ${groupId}:`, banRes ? banRes.description : "Unknown error");
+        console.error(`[Kick] Failed to ban user ${chatId} from chat ${targetId}:`, banRes ? banRes.description : "Unknown error");
       }
     }
   } catch (e: any) {
@@ -678,15 +681,22 @@ async function checkAndApplyReferralReward(referrerChatId: number) {
       const sDict = settings && settings.verification_code ? JSON.parse(settings.verification_code) : {};
       const channelId = sDict.telegram_channel_id || TELEGRAM_CHANNEL_ID || "-1003789578749";
 
+      const groupId = sDict.telegram_group_id || "";
+
       // Unban user first in case they were previously banned/expired
-      try {
-        await sendTelegramRequest("unbanChatMember", {
-          chat_id: channelId,
-          user_id: referrerReg.chat_id,
-          only_if_banned: true
-        });
-      } catch (unbanErr: any) {
-        console.error(`[Unban] Failed to unban referrer ${referrerReg.chat_id}:`, unbanErr.message);
+      const groupsToUnban = [];
+      if (channelId) groupsToUnban.push(channelId);
+      if (groupId) groupsToUnban.push(groupId);
+      for (const targetId of groupsToUnban) {
+        try {
+          await sendTelegramRequest("unbanChatMember", {
+            chat_id: targetId,
+            user_id: referrerReg.chat_id,
+            only_if_banned: true
+          });
+        } catch (unbanErr: any) {
+          console.error(`[Unban] Failed to unban referrer ${referrerReg.chat_id} from ${targetId}:`, unbanErr.message);
+        }
       }
 
       // Generate main channel invite link dynamically
@@ -696,20 +706,23 @@ async function checkAndApplyReferralReward(referrerChatId: number) {
         name: `Free Referral Link for ${referrerReg.name || 'Student'}`
       });
 
-      // Generate private group invite link dynamically for group ID -1004377079119
-      const inviteRes2 = await sendTelegramRequest("createChatInviteLink", {
-        chat_id: "-1004377079119",
-        member_limit: 1,
-        name: `Free Group Link for ${referrerReg.name || 'Student'}`
-      });
+      let inviteLink2 = "";
+      if (groupId) {
+        // Generate private group invite link dynamically for group ID
+        const inviteRes2 = await sendTelegramRequest("createChatInviteLink", {
+          chat_id: groupId,
+          member_limit: 1,
+          name: `Free Group Link for ${referrerReg.name || 'Student'}`
+        });
+        
+        if (inviteRes2 && inviteRes2.ok) {
+          inviteLink2 = inviteRes2.result.invite_link;
+        }
+      }
 
       let inviteLink1 = "";
       if (inviteRes1 && inviteRes1.ok) {
         inviteLink1 = inviteRes1.result.invite_link;
-      }
-      let inviteLink2 = "";
-      if (inviteRes2 && inviteRes2.ok) {
-        inviteLink2 = inviteRes2.result.invite_link;
       }
 
       const links: string[] = [];
@@ -971,15 +984,22 @@ async function handleRequest(req: Request): Promise<Response> {
             const sDict = settings && settings.verification_code ? JSON.parse(settings.verification_code) : {};
             const channelId = sDict.telegram_channel_id || TELEGRAM_CHANNEL_ID || "-1003789578749";
 
+            const groupId = sDict.telegram_group_id || "";
+
             // Unban user first in case they were previously banned/expired
-            try {
-              await sendTelegramRequest("unbanChatMember", {
-                chat_id: channelId,
-                user_id: reg.chat_id,
-                only_if_banned: true
-              });
-            } catch (unbanErr: any) {
-              console.error(`[Unban] Failed to unban user ${reg.chat_id}:`, unbanErr.message);
+            const groupsToUnban = [];
+            if (channelId) groupsToUnban.push(channelId);
+            if (groupId) groupsToUnban.push(groupId);
+            for (const targetId of groupsToUnban) {
+              try {
+                await sendTelegramRequest("unbanChatMember", {
+                  chat_id: targetId,
+                  user_id: reg.chat_id,
+                  only_if_banned: true
+                });
+              } catch (unbanErr: any) {
+                console.error(`[Unban] Failed to unban user ${reg.chat_id} from ${targetId}:`, unbanErr.message);
+              }
             }
 
             const inviteRes1 = await sendTelegramRequest("createChatInviteLink", {
@@ -988,11 +1008,14 @@ async function handleRequest(req: Request): Promise<Response> {
               name: `Main Link for ${reg.name || 'Student'}`
             });
 
-            const inviteRes2 = await sendTelegramRequest("createChatInviteLink", {
-              chat_id: "-1004377079119",
-              member_limit: 1,
-              name: `Group Link for ${reg.name || 'Student'}`
-            });
+            let inviteRes2 = null;
+            if (groupId) {
+              inviteRes2 = await sendTelegramRequest("createChatInviteLink", {
+                chat_id: groupId,
+                member_limit: 1,
+                name: `Group Link for ${reg.name || 'Student'}`
+              });
+            }
             
             let inviteLink1 = "";
             if (inviteRes1 && inviteRes1.ok) {
