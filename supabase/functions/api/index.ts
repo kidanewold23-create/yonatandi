@@ -67,7 +67,9 @@ const STATIC_MESSAGES = {
     "referral_reward_msg": "🎁 **Congratulations! You referred 3 friends successfully!**\n\nHello **{name}**, because you have referred 3 friends, you got the Founders Academy course for free! You are now approved to join our premium private channel!\n\n🔗 **Your One-time Invite Link**:\n{link}\n\n*Note: This link is unique and can only be used by one person.*",
     "quiz_not_completed": "⚠️ **Quiz Not Completed**\n\nYou must complete all daily quizzes to get a certificate of completion.",
     "menu_get_certificate": "Get Certificate 📜",
-    "certificate_caption": "🎓 **CERTIFICATE OF COMPLETION** 🎓\n\nThis certifies that **{name}** has successfully completed the Founders Academy Daily Sequence.\n\nWe are incredibly proud of your dedication. Well done!"
+    "certificate_caption": "🎓 **CERTIFICATE OF COMPLETION** 🎓\n\nThis certifies that **{name}** has successfully completed the Founders Academy Daily Sequence.\n\nWe are incredibly proud of your dedication. Well done!",
+    "menu_customer_support": "Customer Support 🎧",
+    "customer_support_msg": "📞 **Customer Support**\n\nIf you need any help, please contact our support team at @foundersupportt"
   },
   "am": {
     "welcome_choose_lang": "🇪🇹 ወደ ክራፍቶፒያ የእጅ ጥበብ ትምህርት ቤት የእጅ ሥራ ምዝገባ ቦት እንኳን ደህና መጡ!\nእባክዎ ተመራጭ ቋንቋዎን ከታች ይምረጡ:",
@@ -115,7 +117,9 @@ const STATIC_MESSAGES = {
     "referral_reward_msg": "🎁 **እንኳን ደስ አሰኞት! 3 ጓደኞችን በተሳካ ሁኔታ ጋብዘዋል!**\n\nሰላም **{name}**፣ 3 ሰዎችን ስለጋበዙ የFounders Academy ኮርሱን በነጻ አግኝተዋል! አሁን የእኛን ፕሪሚየም የግል ቻናል ለመቀላቀል ፈቃድ አግኝተዋል!\n\n🔗 **የአንድ ጊዜ መጋበዣ ሊንክዎ**:\n{link}\n\n*ማስታወሻ: ይህ ሊንክ ልዩ ነው እና በአንድ ሰው ብቻ ነው ጥቅም ላይ ሊውል የሚችለው።*",
     "quiz_not_completed": "⚠️ **ጥያቄዎች አልተጠናቀቁም**\n\nየማጠናቀቂያ ሰርተፊኬት ለማግኘት ሁሉንም ዕለታዊ ጥያቄዎች ማጠናቀቅ አለብዎት።",
     "menu_get_certificate": "የምስክር ወረቀት ያግኙ 📜",
-    "certificate_caption": "🎓 **የማጠናቀቂያ ምስክር ወረቀት** 🎓\n\nይህ **{name}** የፋውንደርስ አካዳሚ የዕለት ተዕለት ትምህርቶችን በተሳካ ሁኔታ ማጠናቀቃቸውን የሚያረጋግጥ ነው።\n\nበትጋትዎ በጣም እንኮራለን። እንኳን ደስ አሎት!"
+    "certificate_caption": "🎓 **የማጠናቀቂያ ምስክር ወረቀት** 🎓\n\nይህ **{name}** የፋውንደርስ አካዳሚ የዕለት ተዕለት ትምህርቶችን በተሳካ ሁኔታ ማጠናቀቃቸውን የሚያረጋግጥ ነው።\n\nበትጋትዎ በጣም እንኮራለን። እንኳን ደስ አሎት!",
+    "menu_customer_support": "የደንበኞች ድጋፍ 🎧",
+    "customer_support_msg": "📞 **የደንበኞች ድጋፍ**\n\nማንኛውም እርዳታ ከፈለጉ እባክዎ የድጋፍ ቡድናችንን በ @foundersupportt ያግኙ።"
   }
 };
 
@@ -232,7 +236,8 @@ async function removeUserFromChannel(chatId: number) {
 async function getMenuKeyboard(lang = "en", chatId?: number) {
   const keyboard = [
     [{ text: getMsg(lang, "menu_submit_receipt") }, { text: getMsg(lang, "menu_check_status") }],
-    [{ text: getMsg(lang, "menu_refer_friend") }, { text: getMsg(lang, "menu_change_language") }]
+    [{ text: getMsg(lang, "menu_refer_friend") }, { text: getMsg(lang, "menu_change_language") }],
+    [{ text: getMsg(lang, "menu_customer_support") }]
   ];
   if (chatId) {
     try {
@@ -1408,6 +1413,12 @@ async function handleRequest(req: Request): Promise<Response> {
         const refLink = `https://t.me/Founders AcademyBot?start=ref_${chatId}`;
         const msg = getMsg(lang, "referral_message").replace("{ref_link}", refLink);
         await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, parse_mode: "Markdown", reply_markup: await getMenuKeyboard(lang, chatId) });
+        return new Response("OK", { headers: corsHeaders });
+      }
+
+      if (isMenuCommand(text, "menu_customer_support")) {
+        const msg = getMsg(lang, "customer_support_msg");
+        await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, parse_mode: "Markdown" });
         return new Response("OK", { headers: corsHeaders });
       }
 
