@@ -226,13 +226,24 @@ async function removeUserFromChannel(chatId: number) {
   }
 }
 
-function getMenuKeyboard(lang = "en") {
+async function getMenuKeyboard(lang = "en", chatId?: number) {
+  const keyboard = [
+    [{ text: getMsg(lang, "menu_submit_receipt") }],
+    [{ text: getMsg(lang, "menu_refer_friend") }, { text: getMsg(lang, "menu_check_status") }],
+    [{ text: getMsg(lang, "menu_change_language") }]
+  ];
+  if (chatId) {
+    try {
+      const { data: prog } = await supabase.from("user_quiz_progress").select("is_completed").eq("chat_id", chatId).maybeSingle();
+      if (prog && prog.is_completed) {
+        keyboard.unshift([{ text: "Get Certificate 📜" }]);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
   return {
-    keyboard: [
-      [{ text: getMsg(lang, "menu_submit_receipt") }],
-      [{ text: getMsg(lang, "menu_refer_friend") }, { text: getMsg(lang, "menu_check_status") }],
-      [{ text: getMsg(lang, "menu_change_language") }]
-    ],
+    keyboard,
     resize_keyboard: true
   };
 }
@@ -745,7 +756,7 @@ async function checkAndApplyReferralReward(referrerChatId: number) {
           chat_id: referrerChatId,
           text: msg,
           parse_mode: "Markdown",
-          reply_markup: getMenuKeyboard(lang)
+          reply_markup: await getMenuKeyboard(lang, chatId)
         });
       }
     }
@@ -1050,7 +1061,7 @@ async function handleRequest(req: Request): Promise<Response> {
                 chat_id: reg.chat_id,
                 text: msg,
                 parse_mode: "Markdown",
-                reply_markup: getMenuKeyboard(lang)
+                reply_markup: await getMenuKeyboard(lang, chatId)
               });
             }
           } else {
@@ -1066,7 +1077,7 @@ async function handleRequest(req: Request): Promise<Response> {
               chat_id: reg.chat_id,
               text: msg,
               parse_mode: "Markdown",
-              reply_markup: getMenuKeyboard(lang)
+              reply_markup: await getMenuKeyboard(lang, chatId)
             });
           }
           return new Response("OK", { headers: corsHeaders });
@@ -1098,7 +1109,7 @@ async function handleRequest(req: Request): Promise<Response> {
               chat_id: chatId,
               text: getMsg(lang, "ask_name_am"),
               parse_mode: "Markdown",
-              reply_markup: getMenuKeyboard(lang)
+              reply_markup: await getMenuKeyboard(lang, chatId)
             });
           } else {
             const status = reg.status;
@@ -1110,7 +1121,7 @@ async function handleRequest(req: Request): Promise<Response> {
               await sendTelegramRequest("sendMessage", {
                 chat_id: chatId,
                 text: getMsg(lang, "already_registered"),
-                reply_markup: getMenuKeyboard(lang)
+                reply_markup: await getMenuKeyboard(lang, chatId)
               });
             } else if (currentStep === "start") {
               await supabase.from("registrations").update({ step: buildStep(lang, "awaiting_name") }).eq("id", reg.id);
@@ -1118,14 +1129,14 @@ async function handleRequest(req: Request): Promise<Response> {
                 chat_id: chatId,
                 text: getMsg(lang, "ask_name_am"),
                 parse_mode: "Markdown",
-                reply_markup: getMenuKeyboard(lang)
+                reply_markup: await getMenuKeyboard(lang, chatId)
               });
             } else {
               // Ask them standard steps
               if (currentStep === "awaiting_name") {
-                await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "ask_name_am"), parse_mode: "Markdown", reply_markup: getMenuKeyboard(lang) });
+                await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "ask_name_am"), parse_mode: "Markdown", reply_markup: await getMenuKeyboard(lang, chatId) });
               } else if (currentStep === "awaiting_name2") {
-                await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "ask_name_en"), parse_mode: "Markdown", reply_markup: getMenuKeyboard(lang) });
+                await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "ask_name_en"), parse_mode: "Markdown", reply_markup: await getMenuKeyboard(lang, chatId) });
               } else if (currentStep === "awaiting_phone") {
                 const keyboard = {
                   keyboard: [[{ text: getMsg(lang, "btn_share_contact"), request_contact: true }]],
@@ -1411,13 +1422,49 @@ async function handleRequest(req: Request): Promise<Response> {
       if (isMenuCommand(text, "menu_refer_friend") || text === "/refer") {
         const refLink = `https://t.me/Founders AcademyBot?start=ref_${chatId}`;
         const msg = getMsg(lang, "referral_message").replace("{ref_link}", refLink);
-        await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, parse_mode: "Markdown", reply_markup: getMenuKeyboard(lang) });
+        await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, parse_mode: "Markdown", reply_markup: await getMenuKeyboard(lang, chatId) });
+        return new Response("OK", { headers: corsHeaders });
+      }
+
+      if (text === "Get Certificate 📜") {
+        const { data: prog } = await supabase.from("user_quiz_progress").select("is_completed").eq("chat_id", chatId).maybeSingle();
+        if (!prog || !prog.is_completed) {
+          await sendTelegramRequest("sendMessage", {
+            chat_id: chatId,
+            text: getMsg(lang, "quiz_not_completed")
+          });
+          return new Response("OK", { headers: corsHeaders });
+        }
+
+        const name = reg ? (reg.name || "Student") : "Student";
+        const name2 = reg ? (reg.name2 || name) : name;
+        const regDateStr = reg ? (reg.created_at || "") : "";
+        let regDate = "Unknown";
+        if (regDateStr) regDate = regDateStr.split("T")[0];
+        const finishDate = new Date(new Date().getTime() + 3 * 3600000).toISOString().split("T")[0];
+
+        try {
+          const pdfBytes = await generateCertificatePdf(name, regDate, finishDate, name2);
+          const form = new FormData();
+          form.append("chat_id", String(chatId));
+          form.append("caption", `🎓 **CERTIFICATE OF COMPLETION** 🎓\n\nThis certifies that **${name}** has successfully completed the Founders Academy Daily Sequence.\n\nWe are incredibly proud of your dedication. Well done!`);
+          form.append("parse_mode", "Markdown");
+          const blob = new Blob([pdfBytes], { type: "application/pdf" });
+          form.append("document", blob, "Certificate.pdf");
+          await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendDocument`, {
+            method: "POST",
+            body: form
+          });
+          await removeUserFromChannel(chatId);
+        } catch (err: any) {
+          console.error("Error generating menu certificate:", err.message);
+        }
         return new Response("OK", { headers: corsHeaders });
       }
 
       if (isMenuCommand(text, "menu_check_status") || text === "/status") {
         if (!reg || ((!reg.step || !reg.step.includes("completed")) && !["approved", "pending", "declined"].includes(reg.status))) {
-          await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "no_receipt_yet"), reply_markup: getMenuKeyboard(lang) });
+          await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "no_receipt_yet"), reply_markup: await getMenuKeyboard(lang, chatId) });
           return new Response("OK", { headers: corsHeaders });
         }
 
@@ -1432,12 +1479,12 @@ async function handleRequest(req: Request): Promise<Response> {
           msg = getMsg(lang, "status_pending_msg").replace("{receipt}", receipt);
         }
 
-        await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, parse_mode: "Markdown", reply_markup: getMenuKeyboard(lang) });
+        await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, parse_mode: "Markdown", reply_markup: await getMenuKeyboard(lang, chatId) });
         return new Response("OK", { headers: corsHeaders });
       }
 
       if (text === "/help") {
-        await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "help_instructions"), parse_mode: "Markdown", reply_markup: getMenuKeyboard(lang) });
+        await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "help_instructions"), parse_mode: "Markdown", reply_markup: await getMenuKeyboard(lang, chatId) });
         return new Response("OK", { headers: corsHeaders });
       }
 
@@ -1474,7 +1521,7 @@ async function handleRequest(req: Request): Promise<Response> {
               await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, reply_markup: kb });
               return new Response("OK", { headers: corsHeaders });
             } else if (status === "approved" && !isCompleted) {
-              await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "already_registered"), reply_markup: getMenuKeyboard(lang) });
+              await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "already_registered"), reply_markup: await getMenuKeyboard(lang, chatId) });
               return new Response("OK", { headers: corsHeaders });
             } else if (status === "pending") {
               await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "already_pending") });
@@ -1482,7 +1529,7 @@ async function handleRequest(req: Request): Promise<Response> {
             }
           } else if (text.startsWith("/start")) {
             if (reg.step.includes("completed") || ["approved", "pending"].includes(status)) {
-              await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "already_registered"), reply_markup: getMenuKeyboard(lang) });
+              await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "already_registered"), reply_markup: await getMenuKeyboard(lang, chatId) });
               return new Response("OK", { headers: corsHeaders });
             }
           }
@@ -1524,7 +1571,7 @@ async function handleRequest(req: Request): Promise<Response> {
           chat_id: chatId,
           text: getMsg(lang, "ask_name_en"),
           parse_mode: "Markdown",
-          reply_markup: getMenuKeyboard(lang)
+          reply_markup: await getMenuKeyboard(lang, chatId)
         });
         return new Response("OK", { headers: corsHeaders });
       }
@@ -1640,7 +1687,7 @@ async function handleRequest(req: Request): Promise<Response> {
           await checkAndApplyReferralReward(reg.referred_by_chat_id);
         }
 
-        await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "registration_submitted"), parse_mode: "Markdown", reply_markup: getMenuKeyboard(lang) });
+        await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "registration_submitted"), parse_mode: "Markdown", reply_markup: await getMenuKeyboard(lang, chatId) });
 
         // Notify Admin
         const { data: adminRec } = await supabase.from("admins").select("telegram_chat_id").eq("username", ADMIN_USERNAME).maybeSingle();
@@ -1675,7 +1722,7 @@ async function handleRequest(req: Request): Promise<Response> {
       } else {
         msg = getMsg(lang, "last_pending_msg");
       }
-      await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, reply_markup: getMenuKeyboard(lang) });
+      await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, reply_markup: await getMenuKeyboard(lang, chatId) });
       return new Response("OK", { headers: corsHeaders });
     }
 
