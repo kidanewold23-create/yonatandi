@@ -1300,6 +1300,7 @@ async function handleRequest(req: Request): Promise<Response> {
           }
 
           const { data: reg } = await supabase.from("registrations").select("*").eq("chat_id", chatId).order("created_at", { ascending: false }).limit(1).maybeSingle();
+          const [lang] = getLangAndStep(reg);
           const name = reg ? (reg.name || "Student") : "Student";
           const name2 = reg ? (reg.name2 || name) : name;
           const regDateStr = reg ? (reg.created_at || "") : "";
