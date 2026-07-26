@@ -228,9 +228,8 @@ async function removeUserFromChannel(chatId: number) {
 
 async function getMenuKeyboard(lang = "en", chatId?: number) {
   const keyboard = [
-    [{ text: getMsg(lang, "menu_submit_receipt") }],
-    [{ text: getMsg(lang, "menu_refer_friend") }, { text: getMsg(lang, "menu_check_status") }],
-    [{ text: getMsg(lang, "menu_change_language") }]
+    [{ text: getMsg(lang, "menu_submit_receipt") }, { text: getMsg(lang, "menu_check_status") }],
+    [{ text: getMsg(lang, "menu_refer_friend") }, { text: getMsg(lang, "menu_change_language") }]
   ];
   if (chatId) {
     try {
