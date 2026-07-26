@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
-import PDFDocument from "npm:pdfkit@0.13.0";
 import { Buffer } from "https://deno.land/std@0.168.0/node/buffer.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
@@ -482,6 +481,7 @@ async function generateCertificatePdf(name: string, regDate: string, finishDate:
   const { logoBase64, borderBase64 } = await import('./assets.ts');
   const bgBytes = Buffer.from(borderBase64, 'base64');
   const logoBytes = Buffer.from(logoBase64, 'base64');
+  const PDFDocument = (await import("npm:pdfkit@0.13.0")).default;
 
   return new Promise((resolve) => {
     const doc = new PDFDocument({ layout: "landscape", size: "A4", margin: 0 });
