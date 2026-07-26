@@ -66,7 +66,9 @@ const STATIC_MESSAGES = {
     "receipt_approved_msg": "🎉 **Receipt Verification Approved!**\n\nHello **{name}**, your receipt `{receipt}` has been verified successfully. You are now approved to join our premium private channel!\n\n🔗 **Your One-time Invite Link**:\n{link}\n\n*Note: This link is unique and can only be used by one person.*",
     "receipt_declined_msg": "❌ **Receipt Verification Declined**\n\nHello **{name}**, we are sorry, but your receipt `{receipt}` has been declined.\n\n⚠️ **Reason**: {reason}",
     "referral_reward_msg": "🎁 **Congratulations! You referred 3 friends successfully!**\n\nHello **{name}**, because you have referred 3 friends, you got the Founders Academy course for free! You are now approved to join our premium private channel!\n\n🔗 **Your One-time Invite Link**:\n{link}\n\n*Note: This link is unique and can only be used by one person.*",
-    "quiz_not_completed": "⚠️ **Quiz Not Completed**\n\nYou must complete all daily quizzes to get a certificate of completion."
+    "quiz_not_completed": "⚠️ **Quiz Not Completed**\n\nYou must complete all daily quizzes to get a certificate of completion.",
+    "menu_get_certificate": "Get Certificate 📜",
+    "certificate_caption": "🎓 **CERTIFICATE OF COMPLETION** 🎓\n\nThis certifies that **{name}** has successfully completed the Founders Academy Daily Sequence.\n\nWe are incredibly proud of your dedication. Well done!"
   },
   "am": {
     "welcome_choose_lang": "🇪🇹 ወደ ክራፍቶፒያ የእጅ ጥበብ ትምህርት ቤት የእጅ ሥራ ምዝገባ ቦት እንኳን ደህና መጡ!\nእባክዎ ተመራጭ ቋንቋዎን ከታች ይምረጡ:",
@@ -112,7 +114,9 @@ const STATIC_MESSAGES = {
     "receipt_approved_msg": "🎉 **የደረሰኝ ማረጋገጫ ጸድቋል!**\n\nሰላም **{name}**፣ የደረሰኝ ቁጥርዎ `{receipt}` በተሳካ ሁኔታ ተረጋግጧል። አሁን የእኛን ፕሪሚየም የግል ቻናል ለመቀላቀል ፈቃድ አግኝተዋል!\n\n🔗 **የአንድ ጊዜ መጋበዣ ሊንክዎ**:\n{link}\n\n*ማስታወሻ: ይህ ሊንክ ልዩ ነው እና በአንድ ሰው ብቻ ነው ጥቅም ላይ ሊውል የሚችለው።*",
     "receipt_declined_msg": "❌ **የደረሰኝ ማረጋገጫ ተቀባይነት አላገኘም**\n\nሰላም **{name}**፣ የደረሰኝ ቁጥርዎ `{receipt}` ውድቅ ተደርጓል።\n\n⚠️ **ምክንያት**: {reason}",
     "referral_reward_msg": "🎁 **እንኳን ደስ አሰኞት! 3 ጓደኞችን በተሳካ ሁኔታ ጋብዘዋል!**\n\nሰላም **{name}**፣ 3 ሰዎችን ስለጋበዙ የFounders Academy ኮርሱን በነጻ አግኝተዋል! አሁን የእኛን ፕሪሚየም የግል ቻናል ለመቀላቀል ፈቃድ አግኝተዋል!\n\n🔗 **የአንድ ጊዜ መጋበዣ ሊንክዎ**:\n{link}\n\n*ማስታወሻ: ይህ ሊንክ ልዩ ነው እና በአንድ ሰው ብቻ ነው ጥቅም ላይ ሊውል የሚችለው።*",
-    "quiz_not_completed": "⚠️ **ጥያቄዎች አልተጠናቀቁም**\n\nየማጠናቀቂያ ሰርተፊኬት ለማግኘት ሁሉንም ዕለታዊ ጥያቄዎች ማጠናቀቅ አለብዎት።"
+    "quiz_not_completed": "⚠️ **ጥያቄዎች አልተጠናቀቁም**\n\nየማጠናቀቂያ ሰርተፊኬት ለማግኘት ሁሉንም ዕለታዊ ጥያቄዎች ማጠናቀቅ አለብዎት።",
+    "menu_get_certificate": "የምስክር ወረቀት ያግኙ 📜",
+    "certificate_caption": "🎓 **የማጠናቀቂያ ምስክር ወረቀት** 🎓\n\nይህ **{name}** የፋውንደርስ አካዳሚ የዕለት ተዕለት ትምህርቶችን በተሳካ ሁኔታ ማጠናቀቃቸውን የሚያረጋግጥ ነው።\n\nበትጋትዎ በጣም እንኮራለን። እንኳን ደስ አሎት!"
   }
 };
 
@@ -297,6 +301,9 @@ async function sendNextQuizQuestion(chatId: number, isTest1Min = false) {
   const day = prog.current_day || 1;
   const qIndex = prog.current_question_index || 0;
 
+  const { data: reg } = await supabase.from("registrations").select("*").eq("chat_id", chatId).order("created_at", { ascending: false }).limit(1).maybeSingle();
+  const [lang] = getLangAndStep(reg);
+
   const { data: questions } = await supabase.from("questions").select("*").eq("day_number", day).order("created_at", { ascending: true });
   if (!questions || questions.length === 0) {
     const { data: maxQ } = await supabase.from("questions").select("day_number").order("day_number", { ascending: false }).limit(1).maybeSingle();
@@ -304,7 +311,7 @@ async function sendNextQuizQuestion(chatId: number, isTest1Min = false) {
     if (day > maxDay && maxDay > 0) {
       const msg = "🎉 **Congratulations! You have completed all courses!** 🎉\n\nClick below to get your Certificate!";
       const kb = {
-        inline_keyboard: [[{ text: "Get Certificate 📜", callback_data: "get_certificate" }]]
+        inline_keyboard: [[{ text: getMsg(lang, "menu_get_certificate"), callback_data: "get_certificate" }]]
       };
       await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, parse_mode: "Markdown", reply_markup: kb });
     }
@@ -318,7 +325,6 @@ async function sendNextQuizQuestion(chatId: number, isTest1Min = false) {
     if (day >= maxDay) {
       await supabase.from("user_quiz_progress").update({ is_completed: true, last_completed_at: new Date().toISOString() }).eq("chat_id", chatId);
       
-      const { data: reg } = await supabase.from("registrations").select("*").eq("chat_id", chatId).order("created_at", { ascending: false }).limit(1).maybeSingle();
       const name = reg ? (reg.name || "Student") : "Student";
       const name2 = reg ? (reg.name2 || name) : name;
       const regDateStr = reg ? (reg.created_at || "") : "";
@@ -339,8 +345,7 @@ async function sendNextQuizQuestion(chatId: number, isTest1Min = false) {
       if (pdfBytes) {
         const form = new FormData();
         form.append('chat_id', String(chatId));
-        const [lang] = getLangAndStep(reg);
-        const caption = getMsg(lang, "course_completed_msg").replace("{name}", name);
+        const caption = getMsg(lang, "certificate_caption").replace("{name}", name);
         form.append('caption', caption);
         form.append('parse_mode', 'Markdown');
 
@@ -359,11 +364,10 @@ async function sendNextQuizQuestion(chatId: number, isTest1Min = false) {
         }
       }
 
-      const [lang] = getLangAndStep(reg);
       const msg = getMsg(lang, "course_completed_msg").replace("{name}", name);
       const kb = {
         inline_keyboard: [
-          [{ text: "Get Certificate 📜", callback_data: "get_certificate" }]
+          [{ text: getMsg(lang, "menu_get_certificate"), callback_data: "get_certificate" }]
         ]
       };
       await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, parse_mode: "Markdown", reply_markup: kb });
@@ -1310,7 +1314,7 @@ async function handleRequest(req: Request): Promise<Response> {
 
           const form = new FormData();
           form.append("chat_id", String(chatId));
-          form.append("caption", `🎓 **CERTIFICATE OF COMPLETION** 🎓\n\nThis certifies that **${name}** has successfully completed the Founders Academy Daily Sequence.\n\nWe are incredibly proud of your dedication. Well done!`);
+          form.append("caption", getMsg(lang, "certificate_caption").replace("{name}", name));
           form.append("parse_mode", "Markdown");
           
           const blob = new Blob([pdfBytes], { type: "application/pdf" });
@@ -1425,7 +1429,7 @@ async function handleRequest(req: Request): Promise<Response> {
         return new Response("OK", { headers: corsHeaders });
       }
 
-      if (text === "Get Certificate 📜") {
+      if (isMenuCommand(text, "menu_get_certificate")) {
         const { data: prog } = await supabase.from("user_quiz_progress").select("is_completed").eq("chat_id", chatId).maybeSingle();
         if (!prog || !prog.is_completed) {
           await sendTelegramRequest("sendMessage", {
@@ -1446,7 +1450,7 @@ async function handleRequest(req: Request): Promise<Response> {
           const pdfBytes = await generateCertificatePdf(name, regDate, finishDate, name2);
           const form = new FormData();
           form.append("chat_id", String(chatId));
-          form.append("caption", `🎓 **CERTIFICATE OF COMPLETION** 🎓\n\nThis certifies that **${name}** has successfully completed the Founders Academy Daily Sequence.\n\nWe are incredibly proud of your dedication. Well done!`);
+          form.append("caption", getMsg(lang, "certificate_caption").replace("{name}", name));
           form.append("parse_mode", "Markdown");
           const blob = new Blob([pdfBytes], { type: "application/pdf" });
           form.append("document", blob, "Certificate.pdf");
