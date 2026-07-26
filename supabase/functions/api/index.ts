@@ -1408,7 +1408,7 @@ async function handleRequest(req: Request): Promise<Response> {
         if (now > expiry) {
           console.log(`[Expiration Trigger] User ${chatId} has expired. Expiry: ${reg.expires_at}`);
           await supabase.from("registrations").update({ status: "expired" }).eq("id", reg.id);
-          await kickUserFromChannel(chatId);
+          await removeUserFromChannel(chatId);
           const [lang] = getLangAndStep(reg);
           const msg = getMsg(lang, "access_expired_msg");
           await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg });
