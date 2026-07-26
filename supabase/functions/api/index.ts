@@ -759,7 +759,7 @@ async function checkAndApplyReferralReward(referrerChatId: number) {
           chat_id: referrerChatId,
           text: msg,
           parse_mode: "Markdown",
-          reply_markup: await getMenuKeyboard(lang, chatId)
+          reply_markup: await getMenuKeyboard(lang, referrerChatId)
         });
       }
     }
@@ -1064,7 +1064,7 @@ async function handleRequest(req: Request): Promise<Response> {
                 chat_id: reg.chat_id,
                 text: msg,
                 parse_mode: "Markdown",
-                reply_markup: await getMenuKeyboard(lang, chatId)
+                reply_markup: await getMenuKeyboard(lang, reg.chat_id)
               });
             }
           } else {
@@ -1080,7 +1080,7 @@ async function handleRequest(req: Request): Promise<Response> {
               chat_id: reg.chat_id,
               text: msg,
               parse_mode: "Markdown",
-              reply_markup: await getMenuKeyboard(lang, chatId)
+              reply_markup: await getMenuKeyboard(lang, reg.chat_id)
             });
           }
           return new Response("OK", { headers: corsHeaders });
