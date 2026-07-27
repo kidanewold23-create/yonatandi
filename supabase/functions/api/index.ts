@@ -1645,6 +1645,7 @@ async function handleRequest(req: Request): Promise<Response> {
           ]
         };
         await sendTelegramRequest("sendMessage", { chat_id: chatId, text: courseDesc, parse_mode: "Markdown", reply_markup: kb });
+        await sendTelegramRequest("sendMessage", { chat_id: chatId, text: "👇 " + getMsg(lang, "select_payment_method_first"), reply_markup: await getMenuKeyboard(lang, chatId) });
         return new Response("OK", { headers: corsHeaders });
       }
 
