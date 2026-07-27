@@ -679,10 +679,16 @@ async function generateCertificatePdf(name, regDate, finishDate, name2) {
             templatePath = path.resolve(process.cwd(), 'a.html');
         }
 
-        const fileUrl = 'file:///' + templatePath.replace(/\\/g, '/');
+        let html = fs.readFileSync(templatePath, 'utf8');
+
+        // Inject dynamic variables into api/a.html template
+        html = html.replace(/<div class="name" id="student-name">[^<]*<\/div>/, `<div class="name" id="student-name">${actualName}</div>`);
+        html = html.replace(/<div class="subtitle" id="course-title">[^<]*<\/div>/, `<div class="subtitle" id="course-title">${courseTitle}</div>`);
+        html = html.replace(/<div class="date-label" id="completion-date">[^<]*<\/div>/, `<div class="date-label" id="completion-date">${dateStr}</div>`);
+
         const browser = await getPuppeteerBrowser();
         const page = await browser.newPage();
-        await page.goto(fileUrl, { waitUntil: 'networkidle0' });
+        await page.setContent(html, { waitUntil: 'networkidle0' });
 
         await page.evaluate(({ studentName, courseTitle, dateStr }) => {
             if (typeof updateCertificateData === 'function') {
@@ -691,15 +697,6 @@ async function generateCertificatePdf(name, regDate, finishDate, name2) {
                     courseTitle: courseTitle,
                     date: dateStr
                 });
-            } else {
-                const studentEl = document.getElementById('student-name');
-                if (studentEl) studentEl.innerText = studentName;
-
-                const courseEl = document.getElementById('course-title');
-                if (courseEl) courseEl.innerText = courseTitle;
-
-                const dateEl = document.getElementById('completion-date');
-                if (dateEl) dateEl.innerText = dateStr;
             }
         }, { studentName: actualName, courseTitle, dateStr });
 
