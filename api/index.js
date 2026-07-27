@@ -682,8 +682,8 @@ async function generateCertificatePdf(name, regDate, finishDate, name2) {
         let html = fs.readFileSync(templatePath, 'utf8');
 
         // Inject dynamic variables into api/a.html template
-        html = html.replace(/<div class="name" id="student-name">[^<]*<\/div>/, `<div class="name" id="student-name">${actualName}</div>`);
-        html = html.replace(/<div class="subtitle" id="course-title">[^<]*<\/div>/, `<div class="subtitle" id="course-title">${courseTitle}</div>`);
+        html = html.replace(/<div class="recipient-name" id="student-name">[^<]*<\/div>/, `<div class="recipient-name" id="student-name">${actualName}</div>`);
+        html = html.replace(/<span class="highlight-program" id="course-title">[^<]*<\/span>/, `<span class="highlight-program" id="course-title">${courseTitle}</span>`);
         html = html.replace(/<div class="date-label" id="completion-date">[^<]*<\/div>/, `<div class="date-label" id="completion-date">${dateStr}</div>`);
 
         const browser = await getPuppeteerBrowser();
