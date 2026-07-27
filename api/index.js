@@ -2500,9 +2500,12 @@ app.post('/api/bot', async (req, res) => {
         return res.send("OK");
     }
 
-    if (isMenuCommand(text, "menu_get_certificate") || text === "/certificate" || text.includes("Certificate") || text.includes("ምስክር ወረቀት")) {
+    if (isMenuCommand(text, "menu_get_certificate") || isMenuCommand(text, "menu_regenerate_certificate") || text === "/certificate" || text.includes("Certificate") || text.includes("ምስክር ወረቀት") || text.includes("Waraqaa Ragaa") || text.includes("ወረቐት ምስክር")) {
         const prog = await db.getUserQuizProgress(chatId);
-        if (!prog || !prog.is_completed) {
+        const isApproved = reg && reg.status === "approved";
+        const isCompleted = prog && prog.is_completed;
+
+        if (!isCompleted && !isApproved) {
             await sendTelegramRequest("sendMessage", {
                 chat_id: chatId,
                 text: getMsg(lang, "quiz_not_completed"),
@@ -2538,6 +2541,17 @@ app.post('/api/bot', async (req, res) => {
             
             const url = `${TELEGRAM_API_URL}/sendDocument`;
             await axios.post(url, form, { headers: form.getHeaders() });
+
+            await sendTelegramRequest("sendMessage", {
+                chat_id: chatId,
+                text: "🎓 **Your Official PDF Certificate**\n\nIf you ever need to regenerate your certificate, click the button below:",
+                parse_mode: "Markdown",
+                reply_markup: {
+                    inline_keyboard: [
+                        [{ text: "Regenerate Certificate 📜", callback_data: "regenerate_certificate" }]
+                    ]
+                }
+            });
             await removeUserFromChannel(chatId);
         } catch (e) {
             console.error("Error generating/sending PDF:", e.message);

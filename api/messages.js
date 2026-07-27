@@ -57,7 +57,9 @@ const MESSAGES = {
         "err_upload_receipt_only": "Please upload a screenshot/image of your receipt instead of typing text.",
         "quiz_not_completed": "⚠️ **Quiz Not Completed**\n\nYou must complete all daily quizzes to get a certificate of completion.",
         "menu_customer_support": "Customer Support 🎧",
-        "customer_support_msg": "📞 **Customer Support**\n\nIf you need any help, please contact our support team at @foundersupportt"
+        "customer_support_msg": "📞 **Customer Support**\n\nIf you need any help, please contact our support team at @foundersupportt",
+        "menu_get_certificate": "Get Certificate 📜",
+        "menu_regenerate_certificate": "Regenerate Certificate 📜"
     },
     "am": {
         "welcome_choose_lang": "ወደ ፋውንደርስ አካዳሚ የእጅ ስራ ትምህርት ቤት እንኳን በደህና መጡ!\n\nእባክዎ ቋንቋዎን ይምረጡ:",
