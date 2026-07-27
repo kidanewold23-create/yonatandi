@@ -565,94 +565,63 @@ function gregorianToEthiopianString(gregDateStr) {
     }
 }
 
-// Generate PDF Certificate Helper
+// Generate PDF Certificate Helper using Puppeteer and api/a.html
 async function generateCertificatePdf(name, regDate, finishDate, name2) {
     const fs = require('fs');
     const path = require('path');
     const settings = await db.getPaymentSettings();
 
-    const actualName2 = name2 || name;
-
-    let templatePath = path.join(__dirname, 'IMG_6757.html');
-    if (!fs.existsSync(templatePath)) {
-        templatePath = path.join(process.cwd(), 'api', 'IMG_6757.html');
-    }
-    if (!fs.existsSync(templatePath)) {
-        templatePath = path.join(process.cwd(), 'IMG_6757.html');
-    }
-    let html = fs.readFileSync(templatePath, 'utf8');
-
-    const programAm  = settings.cert_program_am  || "እደጥበብ";
-    const programEn  = settings.cert_program_en  || "Hand Craft & Art";
-    const durationAm = settings.cert_duration_am || "4";
-    const durationEn = settings.cert_duration_en || "4";
-    const signatureBase64 = settings.signature_base64 || "";
-    const sealBase64 = settings.seal_base64 || "";
-
-    // Logo is now loaded via public URL in the HTML directly
-
-    const printStyles = `
-        <style>
-            @media print {
-                @page { size: 10.9375in 7.7083in; margin: 0; }
-                html, body { width: 1050px !important; height: 740px !important; margin: 0 !important; padding: 0 !important; background-color: #ffffff !important; display: block !important; overflow: hidden !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-                .certificate-canvas { width: 1050px !important; height: 740px !important; position: absolute !important; top: 0 !important; left: 0 !important; margin: 0 !important; padding: 30px 40px !important; box-sizing: border-box !important; border: none !important; box-shadow: none !important; background-color: #ffffff !important; page-break-inside: avoid !important; transform: none !important; }
-                .fill-blank-line, .dotted-blank-line { vertical-align: baseline !important; height: auto !important; text-align: center !important; font-weight: bold !important; display: inline-block !important; }
-                .date-container-left, .date-container-right { display: inline-flex !important; align-items: baseline !important; }
-            }
-        </style>
-    `;
-    html = html.replace('</head>', printStyles + '</head>');
-
-    html = html.replace('<div class="fill-blank-line" style="width: 88%; margin-left: 10px;"></div>', `<div class="fill-blank-line" style="width: 88%; margin-left: 10px; text-align: center; font-weight: bold; font-size: 16px;">${name}</div>`);
-    html = html.replace('<div class="fill-blank-line" style="width: 90%; margin-left: 10px;"></div>', `<div class="fill-blank-line" style="width: 90%; margin-left: 10px; text-align: center; font-weight: bold; font-size: 16px;">${actualName2}</div>`);
-    html = html.replace('<div class="dotted-blank-line" style="width: 95px;"></div>', `<div class="dotted-blank-line" style="width: 95px; text-align: center; font-weight: bold;">${durationAm}</div>`);
-    html = html.replace('<div class="dotted-blank-line" style="width: 185px;"></div>', `<div class="dotted-blank-line" style="width: 185px; text-align: center; font-weight: bold;">${programAm}</div>`);
-    html = html.replace('PROGRAM IN<div class="dotted-blank-line" style="width: 200px;"></div> AT FOUNDERS ACADEMY.', `PROGRAM IN <div class="dotted-blank-line" style="width: 200px; text-align: center; font-weight: bold;">${programEn}</div> AT FOUNDERS ACADEMY.`);
-    html = html.replace('THE TRAINING WAS CONDUCTED FOR<div class="dotted-blank-line" style="width: 95px;"></div>WEEK.', `THE TRAINING WAS CONDUCTED FOR <div class="dotted-blank-line" style="width: 95px; text-align: center; font-weight: bold;">${durationEn}</div> WEEK.`);
-    const ethFinishDate = gregorianToEthiopianString(finishDate);
-    html = html.replace('ቀን <div class="dotted-blank-line" style="width: 165px;"></div> ዓ.ም', `ቀን <div class="dotted-blank-line" style="width: 165px; text-align: center; font-weight: bold;">${ethFinishDate}</div> ዓ.ም`);
-    html = html.replace('DATE: <div class="fill-blank-line" style="width: 150px;"></div>', `DATE: <div class="fill-blank-line" style="width: 150px; text-align: center; font-weight: bold;">${finishDate}</div>`);
-    
-    let signatureHtml = 'SIGNED: <div class="fill-blank-line" style="width: 190px;"></div>';
-    if (signatureBase64 || sealBase64) {
-        let insideHtml = "";
-        if (signatureBase64) {
-            insideHtml += `<img src="${signatureBase64}" style="max-height: 45px; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); z-index: 1;">`;
-        }
-        if (sealBase64) {
-            insideHtml += `<img src="${sealBase64}" style="position: absolute; max-height: 300px; max-width: 300px; object-fit: contain; bottom: -115px; left: 50%; transform: translateX(-50%); z-index: 2; opacity: 0.75; pointer-events: none;">`;
-        }
-        signatureHtml = `SIGNED: <div class="fill-blank-line" style="width: 190px; position: relative; text-align: center; height: 35px !important; vertical-align: bottom !important;">${insideHtml}</div>`;
-    }
-    html = html.replace('SIGNED: <div class="fill-blank-line" style="width: 190px;"></div>', signatureHtml);
-    html = html.replace('<!-- SEAL_PLACEHOLDER -->', '');
+    const actualName = name || name2 || "Melese Kebede";
+    const courseTitle = settings.cert_program_en || "FACEBOOK ADS TRAINING PROGRAM";
+    const dateStr = finishDate || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
     try {
-        const FormData = require('form-data');
-        const axios = require('axios');
-        
-        const form = new FormData();
-        form.append('files', Buffer.from(html, 'utf-8'), { filename: 'index.html', contentType: 'text/html' });
-        // Set paper size exactly to match 1050x740 CSS canvas
-        form.append('paperWidth', '10.9375');
-        form.append('paperHeight', '7.7083');
-        form.append('marginTop', '0');
-        form.append('marginBottom', '0');
-        form.append('marginLeft', '0');
-        form.append('marginRight', '0');
-        form.append('preferCssPageSize', 'true');
-        form.append('printBackground', 'true');
-        
-        const res = await axios.post('https://demo.gotenberg.dev/forms/chromium/convert/html', form, {
-            headers: form.getHeaders(),
-            responseType: 'arraybuffer',
-            timeout: 15000
+        const puppeteer = require('puppeteer');
+        let templatePath = path.resolve(__dirname, 'a.html');
+        if (!fs.existsSync(templatePath)) {
+            templatePath = path.resolve(process.cwd(), 'api', 'a.html');
+        }
+        if (!fs.existsSync(templatePath)) {
+            templatePath = path.resolve(process.cwd(), 'a.html');
+        }
+
+        const fileUrl = 'file:///' + templatePath.replace(/\\/g, '/');
+        const browser = await puppeteer.launch({
+            headless: 'new',
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
-        
-        return res.data;
+        const page = await browser.newPage();
+        await page.goto(fileUrl, { waitUntil: 'networkidle0' });
+
+        await page.evaluate(({ studentName, courseTitle, dateStr }) => {
+            if (typeof updateCertificateData === 'function') {
+                updateCertificateData({
+                    studentName: studentName,
+                    courseTitle: courseTitle,
+                    date: dateStr
+                });
+            } else {
+                const studentEl = document.getElementById('student-name');
+                if (studentEl) studentEl.innerText = studentName;
+
+                const courseEl = document.getElementById('course-title');
+                if (courseEl) courseEl.innerText = courseTitle;
+
+                const dateEl = document.getElementById('completion-date');
+                if (dateEl) dateEl.innerText = dateStr;
+            }
+        }, { studentName: actualName, courseTitle, dateStr });
+
+        const pdfBuffer = await page.pdf({
+            format: 'A4',
+            landscape: true,
+            printBackground: true
+        });
+
+        await browser.close();
+        return pdfBuffer;
     } catch (err) {
-        console.error("Gotenberg PDF API error:", err.message);
+        console.error("Puppeteer PDF generation error:", err.message);
         throw err;
     }
 }
