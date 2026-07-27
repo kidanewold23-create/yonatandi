@@ -1854,24 +1854,24 @@ app.post('/api/bot', async (req, res) => {
                     await db.upsertRegistration(chatId, { step: buildStep(lang, "awaiting_name") });
                     await sendTelegramRequest("sendMessage", {
                         chat_id: chatId,
-                        text: getMsg(lang, "ask_name_am"),
+                        text: getMsg(lang, "ask_name"),
                         parse_mode: "Markdown",
-                        reply_markup: getMenuKeyboard(lang)
+                        reply_markup: await getMenuKeyboard(lang, chatId)
                     });
                 } else {
                     if (currentStep === "awaiting_name") {
                         await sendTelegramRequest("sendMessage", {
                             chat_id: chatId,
-                            text: getMsg(lang, "ask_name_am"),
+                            text: getMsg(lang, "ask_name"),
                             parse_mode: "Markdown",
-                            reply_markup: getMenuKeyboard(lang)
+                            reply_markup: await getMenuKeyboard(lang, chatId)
                         });
                     } else if (currentStep === "awaiting_name2") {
                         await sendTelegramRequest("sendMessage", {
                             chat_id: chatId,
-                            text: getMsg(lang, "ask_name_en"),
+                            text: getMsg(lang, "ask_name"),
                             parse_mode: "Markdown",
-                            reply_markup: getMenuKeyboard(lang)
+                            reply_markup: await getMenuKeyboard(lang, chatId)
                         });
                     } else if (currentStep === "awaiting_phone") {
                         const keyboard = {

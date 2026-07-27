@@ -1100,7 +1100,7 @@ async function handleRequest(req: Request): Promise<Response> {
             });
             await sendTelegramRequest("sendMessage", {
               chat_id: chatId,
-              text: getMsg(lang, "ask_name_am"),
+              text: getMsg(lang, "ask_name"),
               parse_mode: "Markdown",
               reply_markup: await getMenuKeyboard(lang, chatId)
             });
@@ -1120,16 +1120,14 @@ async function handleRequest(req: Request): Promise<Response> {
               await supabase.from("registrations").update({ step: buildStep(lang, "awaiting_name") }).eq("id", reg.id);
               await sendTelegramRequest("sendMessage", {
                 chat_id: chatId,
-                text: getMsg(lang, "ask_name_am"),
+                text: getMsg(lang, "ask_name"),
                 parse_mode: "Markdown",
                 reply_markup: await getMenuKeyboard(lang, chatId)
               });
             } else {
               // Ask them standard steps
-              if (currentStep === "awaiting_name") {
-                await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "ask_name_am"), parse_mode: "Markdown", reply_markup: await getMenuKeyboard(lang, chatId) });
-              } else if (currentStep === "awaiting_name2") {
-                await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "ask_name_en"), parse_mode: "Markdown", reply_markup: await getMenuKeyboard(lang, chatId) });
+              if (currentStep === "awaiting_name" || currentStep === "awaiting_name2") {
+                await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "ask_name"), parse_mode: "Markdown", reply_markup: await getMenuKeyboard(lang, chatId) });
               } else if (currentStep === "awaiting_phone") {
                 const keyboard = {
                   keyboard: [[{ text: getMsg(lang, "btn_share_contact"), request_contact: true }]],
