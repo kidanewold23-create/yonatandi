@@ -487,21 +487,43 @@ function buildStep(lang, step) {
 }
 
 async function getMenuKeyboard(lang = "en", chatId = null) {
-    const keyboard = [
-        [{ text: getMsg(lang, "menu_submit_receipt") }],
-        [{ text: getMsg(lang, "menu_refer_friend") }, { text: getMsg(lang, "menu_check_status") }],
-        [{ text: getMsg(lang, "menu_change_language") }, { text: getMsg(lang, "menu_customer_support") }]
-    ];
+    let hasSubmittedReceipt = false;
+    let isCompletedQuiz = false;
+    
     if (chatId) {
         try {
+            const reg = await db.getRegistration(chatId);
+            if (reg && (reg.receipt_number || (reg.step && reg.step.includes("completed")) || ["approved", "pending", "declined"].includes(reg.status))) {
+                hasSubmittedReceipt = true;
+            }
             const prog = await db.getUserQuizProgress(chatId);
             if (prog && prog.is_completed) {
-                keyboard.unshift([{ text: getMsg(lang, "menu_get_certificate") || "Get Certificate 📜" }]);
+                isCompletedQuiz = true;
             }
         } catch (e) {
             // ignore
         }
     }
+
+    const keyboard = [
+        [{ text: getMsg(lang, "menu_submit_receipt") }]
+    ];
+
+    const row2 = [{ text: getMsg(lang, "menu_refer_friend") }];
+    if (hasSubmittedReceipt) {
+        row2.push({ text: getMsg(lang, "menu_check_status") });
+    }
+    keyboard.push(row2);
+
+    keyboard.push([
+        { text: getMsg(lang, "menu_change_language") },
+        { text: getMsg(lang, "menu_customer_support") }
+    ]);
+
+    if (isCompletedQuiz) {
+        keyboard.unshift([{ text: getMsg(lang, "menu_get_certificate") || "Get Certificate 📜" }]);
+    }
+
     return {
         keyboard,
         resize_keyboard: true
@@ -2558,7 +2580,7 @@ app.post('/api/bot', async (req, res) => {
     }
 
     // Step progression state machine
-    if (currentStep === "awaiting_name") {
+    if (currentStep === "awaiting_name" || currentStep === "awaiting_name2") {
         if (!text) {
             await sendTelegramRequest("sendMessage", {
                 chat_id: chatId,
@@ -2567,26 +2589,7 @@ app.post('/api/bot', async (req, res) => {
             return res.send("OK");
         }
             
-        await db.upsertRegistration(chatId, { name: text, step: buildStep(lang, "awaiting_name2") });
-        await sendTelegramRequest("sendMessage", {
-            chat_id: chatId,
-            text: getMsg(lang, "ask_name_en"),
-            parse_mode: "Markdown",
-            reply_markup: getMenuKeyboard(lang)
-        });
-        return res.send("OK");
-    }
-
-    if (currentStep === "awaiting_name2") {
-        if (!text) {
-            await sendTelegramRequest("sendMessage", {
-                chat_id: chatId,
-                text: getMsg(lang, "invalid_name")
-            });
-            return res.send("OK");
-        }
-            
-        await db.upsertRegistration(chatId, { name2: text, step: buildStep(lang, "awaiting_phone") });
+        await db.upsertRegistration(chatId, { name: text, name2: text, step: buildStep(lang, "awaiting_phone") });
         const keyboard = {
             keyboard: [[{
                 text: getMsg(lang, "btn_share_contact"),
@@ -2632,7 +2635,20 @@ app.post('/api/bot', async (req, res) => {
             
         await db.upsertRegistration(chatId, { phone: phone, step: buildStep(lang, "awaiting_payment_method") });
         
-        const msg = `${getMsg(lang, "phone_saved")}\n\n${getMsg(lang, "ask_payment_method")}`;
+        let settings = {};
+        try { settings = await db.getPaymentSettings(); } catch (e) {}
+
+        const courseName = (settings && settings.cert_program_en) ? settings.cert_program_en : "FACEBOOK ADS TRAINING PROGRAM";
+        const duration = (settings && settings.cert_duration_en) ? settings.cert_duration_en : "4 Weeks";
+        const amount = (settings && settings.amount) ? settings.amount : "500";
+
+        let courseDesc = "";
+        if (lang === "am") {
+            courseDesc = `✅ **ስልክ ቁጥርዎ ተቀምጧል!**\n\n📚 **የስልጠናው ስም**: ${(settings && settings.cert_program_am) ? settings.cert_program_am : courseName}\n⏱ **የስልጠና ቆይታ**: ${(settings && settings.cert_duration_am) ? settings.cert_duration_am : "4 ሳምንት"}\n💰 **የመመዝገቢያ ክፍያ**: ${amount} ብር\n\n` + getMsg(lang, "ask_payment_method");
+        } else {
+            courseDesc = `✅ **Phone number saved successfully!**\n\n📚 **Course Name**: ${courseName}\n⏱ **Duration**: ${duration}\n💰 **Registration Fee**: ${amount} ETB\n\n` + getMsg(lang, "ask_payment_method");
+        }
+
         const kb = {
             inline_keyboard: [
                 [{ text: getMsg(lang, "btn_telebirr"), callback_data: "pay_telebirr" }, { text: getMsg(lang, "btn_cbe"), callback_data: "pay_cbe" }],
@@ -2641,7 +2657,8 @@ app.post('/api/bot', async (req, res) => {
         };
         await sendTelegramRequest("sendMessage", {
             chat_id: chatId,
-            text: msg,
+            text: courseDesc,
+            parse_mode: "Markdown",
             reply_markup: kb
         });
         return res.send("OK");

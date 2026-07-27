@@ -236,21 +236,43 @@ async function removeUserFromChannel(chatId: number) {
 }
 
 async function getMenuKeyboard(lang = "en", chatId?: number) {
-  const keyboard = [
-    [{ text: getMsg(lang, "menu_submit_receipt") }, { text: getMsg(lang, "menu_check_status") }],
-    [{ text: getMsg(lang, "menu_refer_friend") }, { text: getMsg(lang, "menu_change_language") }],
-    [{ text: getMsg(lang, "menu_customer_support") }]
-  ];
+  let hasSubmittedReceipt = false;
+  let isCompletedQuiz = false;
+
   if (chatId) {
     try {
+      const { data: reg } = await supabase.from("registrations").select("receipt_number, step, status").eq("chat_id", chatId).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (reg && (reg.receipt_number || (reg.step && reg.step.includes("completed")) || ["approved", "pending", "declined"].includes(reg.status))) {
+        hasSubmittedReceipt = true;
+      }
       const { data: prog } = await supabase.from("user_quiz_progress").select("is_completed").eq("chat_id", chatId).maybeSingle();
       if (prog && prog.is_completed) {
-        keyboard.unshift([{ text: "Get Certificate 📜" }]);
+        isCompletedQuiz = true;
       }
     } catch (e) {
       // ignore
     }
   }
+
+  const keyboard = [
+    [{ text: getMsg(lang, "menu_submit_receipt") }]
+  ];
+
+  const row2 = [{ text: getMsg(lang, "menu_refer_friend") }];
+  if (hasSubmittedReceipt) {
+    row2.push({ text: getMsg(lang, "menu_check_status") });
+  }
+  keyboard.push(row2);
+
+  keyboard.push([
+    { text: getMsg(lang, "menu_change_language") },
+    { text: getMsg(lang, "menu_customer_support") }
+  ]);
+
+  if (isCompletedQuiz) {
+    keyboard.unshift([{ text: "Get Certificate 📜" }]);
+  }
+
   return {
     keyboard,
     resize_keyboard: true
@@ -1539,27 +1561,12 @@ async function handleRequest(req: Request): Promise<Response> {
         return new Response("OK", { headers: corsHeaders });
       }
 
-      if (currentStep === "awaiting_name") {
+      if (currentStep === "awaiting_name" || currentStep === "awaiting_name2") {
         if (!text) {
           await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "invalid_name") });
           return new Response("OK", { headers: corsHeaders });
         }
-        await supabase.from("registrations").update({ name: text, step: buildStep(lang, "awaiting_name2") }).eq("id", reg.id);
-        await sendTelegramRequest("sendMessage", {
-          chat_id: chatId,
-          text: getMsg(lang, "ask_name_en"),
-          parse_mode: "Markdown",
-          reply_markup: await getMenuKeyboard(lang, chatId)
-        });
-        return new Response("OK", { headers: corsHeaders });
-      }
-
-      if (currentStep === "awaiting_name2") {
-        if (!text) {
-          await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "invalid_name") });
-          return new Response("OK", { headers: corsHeaders });
-        }
-        await supabase.from("registrations").update({ name2: text, step: buildStep(lang, "awaiting_phone") }).eq("id", reg.id);
+        await supabase.from("registrations").update({ name: text, name2: text, step: buildStep(lang, "awaiting_phone") }).eq("id", reg.id);
         const keyboard = {
           keyboard: [[{ text: getMsg(lang, "btn_share_contact"), request_contact: true }]],
           one_time_keyboard: true,
@@ -1584,14 +1591,31 @@ async function handleRequest(req: Request): Promise<Response> {
         }
 
         await supabase.from("registrations").update({ phone: phone, step: buildStep(lang, "awaiting_payment_method") }).eq("id", reg.id);
-        const msg = `${getMsg(lang, "phone_saved")}\n\n${getMsg(lang, "ask_payment_method")}`;
+
+        let settings: any = {};
+        try {
+          const { data: adminRec } = await supabase.from("admins").select("verification_code").eq("username", "payment_settings").maybeSingle();
+          if (adminRec && adminRec.verification_code) settings = JSON.parse(adminRec.verification_code);
+        } catch (_e) {}
+
+        const courseName = (settings && settings.cert_program_en) ? settings.cert_program_en : "FACEBOOK ADS TRAINING PROGRAM";
+        const duration = (settings && settings.cert_duration_en) ? settings.cert_duration_en : "4 Weeks";
+        const amount = (settings && settings.amount) ? settings.amount : "500";
+
+        let courseDesc = "";
+        if (lang === "am") {
+          courseDesc = `✅ **ስልክ ቁጥርዎ ተቀምጧል!**\n\n📚 **የስልጠናው ስም**: ${(settings && settings.cert_program_am) ? settings.cert_program_am : courseName}\n⏱ **የስልጠና ቆይታ**: ${(settings && settings.cert_duration_am) ? settings.cert_duration_am : "4 ሳምንት"}\n💰 **የመመዝገቢያ ክፍያ**: ${amount} ብር\n\n` + getMsg(lang, "ask_payment_method");
+        } else {
+          courseDesc = `✅ **Phone number saved successfully!**\n\n📚 **Course Name**: ${courseName}\n⏱ **Duration**: ${duration}\n💰 **Registration Fee**: ${amount} ETB\n\n` + getMsg(lang, "ask_payment_method");
+        }
+
         const kb = {
           inline_keyboard: [
             [{ text: getMsg(lang, "btn_telebirr"), callback_data: "pay_telebirr" }, { text: getMsg(lang, "btn_cbe"), callback_data: "pay_cbe" }],
             [{ text: getMsg(lang, "btn_abyssinia"), callback_data: "pay_abyssinia" }]
           ]
         };
-        await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, reply_markup: kb });
+        await sendTelegramRequest("sendMessage", { chat_id: chatId, text: courseDesc, parse_mode: "Markdown", reply_markup: kb });
         return new Response("OK", { headers: corsHeaders });
       }
 
