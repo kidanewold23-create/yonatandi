@@ -2271,7 +2271,6 @@ app.post('/api/bot', async (req, res) => {
                 return res.send("OK");
             }
 
-            const reg = await db.getRegistration(chatId);
             const name = reg ? (reg.name || "Student") : "Student";
             const name2 = reg ? (reg.name2 || name) : name;
             const regDateStr = reg ? (reg.created_at || "") : "";
