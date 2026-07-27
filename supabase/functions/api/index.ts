@@ -1564,6 +1564,37 @@ async function handleRequest(req: Request): Promise<Response> {
           await sendTelegramRequest("sendMessage", { chat_id: chatId, text: getMsg(lang, "invalid_name") });
           return new Response("OK", { headers: corsHeaders });
         }
+
+        if (reg && reg.phone && reg.phone.trim() !== "") {
+          await supabase.from("registrations").update({ name: text, name2: text, step: buildStep(lang, "awaiting_payment_method") }).eq("id", reg.id);
+
+          let settings: any = {};
+          try {
+            const { data: adminRec } = await supabase.from("admins").select("verification_code").eq("username", "payment_settings").maybeSingle();
+            if (adminRec && adminRec.verification_code) settings = JSON.parse(adminRec.verification_code);
+          } catch (_e) {}
+
+          const courseName = (settings && settings.cert_program_en) ? settings.cert_program_en : "FACEBOOK ADS TRAINING PROGRAM";
+          const duration = (settings && settings.cert_duration_en) ? settings.cert_duration_en : "4 Weeks";
+          const amount = (settings && settings.amount) ? settings.amount : "500";
+
+          let courseDesc = "";
+          if (lang === "am") {
+            courseDesc = `✅ **ስምዎ ተቀምጧል!**\n\n📚 **የስልጠናው ስም**: ${(settings && settings.cert_program_am) ? settings.cert_program_am : courseName}\n⏱ **የስልጠና ቆይታ**: ${(settings && settings.cert_duration_am) ? settings.cert_duration_am : "4 ሳምንት"}\n💰 **የመመዝገቢያ ክፍያ**: ${amount} ብር\n\n` + getMsg(lang, "ask_payment_method");
+          } else {
+            courseDesc = `✅ **Name saved successfully!**\n\n📚 **Course Name**: ${courseName}\n⏱ **Duration**: ${duration}\n💰 **Registration Fee**: ${amount} ETB\n\n` + getMsg(lang, "ask_payment_method");
+          }
+
+          const kb = {
+            inline_keyboard: [
+              [{ text: getMsg(lang, "btn_telebirr"), callback_data: "pay_telebirr" }, { text: getMsg(lang, "btn_cbe"), callback_data: "pay_cbe" }],
+              [{ text: getMsg(lang, "btn_abyssinia"), callback_data: "pay_abyssinia" }]
+            ]
+          };
+          await sendTelegramRequest("sendMessage", { chat_id: chatId, text: courseDesc, parse_mode: "Markdown", reply_markup: kb });
+          return new Response("OK", { headers: corsHeaders });
+        }
+
         await supabase.from("registrations").update({ name: text, name2: text, step: buildStep(lang, "awaiting_phone") }).eq("id", reg.id);
         const keyboard = {
           keyboard: [[{ text: getMsg(lang, "btn_share_contact"), request_contact: true }]],

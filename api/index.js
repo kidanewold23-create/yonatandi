@@ -2247,7 +2247,7 @@ app.post('/api/bot', async (req, res) => {
                     parse_mode: "Markdown"
                 });
             }
-        } else if (callbackData === "get_certificate") {
+        } else if (callbackData === "get_certificate" || callbackData === "regenerate_certificate") {
             const chatId = callbackQuery.message.chat.id;
             await sendTelegramRequest("answerCallbackQuery", { callback_query_id: callbackQueryId, text: "Generating certificate, please wait..." });
             
@@ -2297,13 +2297,25 @@ app.post('/api/bot', async (req, res) => {
                 
                 const url = `${TELEGRAM_API_URL}/sendDocument`;
                 await axios.post(url, form, { headers: form.getHeaders() });
+
+                await sendTelegramRequest("sendMessage", {
+                    chat_id: chatId,
+                    text: "🎓 **Your Official PDF Certificate**\n\nIf you ever need to regenerate your certificate, click the button below:",
+                    parse_mode: "Markdown",
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{ text: "Regenerate Certificate 📜", callback_data: "regenerate_certificate" }]
+                        ]
+                    }
+                });
+
                 await removeUserFromChannel(chatId);
             } catch (e) {
                 console.error("Error generating/sending PDF:", e.message);
                 await sendTelegramRequest("sendMessage", {
                     chat_id: chatId,
                     text: `Sorry, there was an error generating your certificate. Error details: ${e.message}\nPlease try again later.`,
-                    reply_markup: { inline_keyboard: [[{ text: "Try Again 🔄", callback_data: "get_certificate" }]] }
+                    reply_markup: { inline_keyboard: [[{ text: "Regenerate Certificate 📜", callback_data: "regenerate_certificate" }]] }
                 });
             }
         }
@@ -2608,11 +2620,12 @@ app.post('/api/bot', async (req, res) => {
             }
         }
                 
+        const existingPhone = reg ? (reg.phone || "") : "";
         await db.upsertRegistration(chatId, {
             step: "start",
             status: "started",
             name: "",
-            phone: "",
+            phone: existingPhone,
             receipt_number: "",
             referred_by_chat_id: referredBy
         });
@@ -2640,6 +2653,39 @@ app.post('/api/bot', async (req, res) => {
             await sendTelegramRequest("sendMessage", {
                 chat_id: chatId,
                 text: getMsg(lang, "invalid_name")
+            });
+            return res.send("OK");
+        }
+
+        // If phone number is ALREADY saved in database for this user, do NOT ask for phone again!
+        if (reg && reg.phone && reg.phone.trim() !== "") {
+            await db.upsertRegistration(chatId, { name: text, name2: text, step: buildStep(lang, "awaiting_payment_method") });
+            
+            let settings = {};
+            try { settings = await db.getPaymentSettings(); } catch (e) {}
+
+            const courseName = (settings && settings.cert_program_en) ? settings.cert_program_en : "FACEBOOK ADS TRAINING PROGRAM";
+            const duration = (settings && settings.cert_duration_en) ? settings.cert_duration_en : "4 Weeks";
+            const amount = (settings && settings.amount) ? settings.amount : "500";
+
+            let courseDesc = "";
+            if (lang === "am") {
+                courseDesc = `✅ **ስምዎ ተቀምጧል!**\n\n📚 **የስልጠናው ስም**: ${(settings && settings.cert_program_am) ? settings.cert_program_am : courseName}\n⏱ **የስልጠና ቆይታ**: ${(settings && settings.cert_duration_am) ? settings.cert_duration_am : "4 ሳምንት"}\n💰 **የመመዝገቢያ ክፍያ**: ${amount} ብር\n\n` + getMsg(lang, "ask_payment_method");
+            } else {
+                courseDesc = `✅ **Name saved successfully!**\n\n📚 **Course Name**: ${courseName}\n⏱ **Duration**: ${duration}\n💰 **Registration Fee**: ${amount} ETB\n\n` + getMsg(lang, "ask_payment_method");
+            }
+
+            const kb = {
+                inline_keyboard: [
+                    [{ text: getMsg(lang, "btn_telebirr"), callback_data: "pay_telebirr" }, { text: getMsg(lang, "btn_cbe"), callback_data: "pay_cbe" }],
+                    [{ text: getMsg(lang, "btn_abyssinia"), callback_data: "pay_abyssinia" }]
+                ]
+            };
+            await sendTelegramRequest("sendMessage", {
+                chat_id: chatId,
+                text: courseDesc,
+                parse_mode: "Markdown",
+                reply_markup: kb
             });
             return res.send("OK");
         }
