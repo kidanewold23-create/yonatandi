@@ -2257,9 +2257,12 @@ app.post('/api/bot', async (req, res) => {
                 reply_markup: { inline_keyboard: [] }
             });
             
+            const reg = await db.getRegistration(chatId);
             const prog = await db.getUserQuizProgress(chatId);
-            if (!prog || !prog.is_completed) {
-                const reg = await db.getRegistration(chatId);
+            const isApproved = reg && reg.status === "approved";
+            const isCompleted = prog && prog.is_completed;
+
+            if (!isCompleted && !isApproved) {
                 const [lang] = getLangAndStep(reg);
                 await sendTelegramRequest("sendMessage", {
                     chat_id: chatId,

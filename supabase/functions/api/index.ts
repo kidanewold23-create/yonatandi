@@ -1276,9 +1276,13 @@ async function handleRequest(req: Request): Promise<Response> {
             reply_markup: { inline_keyboard: [] }
           });
 
+          const { data: reg } = await supabase.from("registrations").select("*").eq("chat_id", chatId).order("created_at", { ascending: false }).limit(1).maybeSingle();
           const { data: prog } = await supabase.from("user_quiz_progress").select("is_completed").eq("chat_id", chatId).maybeSingle();
-          if (!prog || !prog.is_completed) {
-            const { data: reg } = await supabase.from("registrations").select("*").eq("chat_id", chatId).order("created_at", { ascending: false }).limit(1).maybeSingle();
+          
+          const isApproved = reg && reg.status === "approved";
+          const isCompleted = prog && prog.is_completed;
+
+          if (!isCompleted && !isApproved) {
             const [lang] = getLangAndStep(reg);
             await sendTelegramRequest("sendMessage", {
               chat_id: chatId,
