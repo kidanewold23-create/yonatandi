@@ -490,7 +490,7 @@ async function getMenuKeyboard(lang = "en", chatId = null) {
     const keyboard = [
         [{ text: getMsg(lang, "menu_submit_receipt") }],
         [{ text: getMsg(lang, "menu_refer_friend") }, { text: getMsg(lang, "menu_check_status") }],
-        [{ text: getMsg(lang, "menu_change_language") }]
+        [{ text: getMsg(lang, "menu_change_language") }, { text: getMsg(lang, "menu_customer_support") }]
     ];
     if (chatId) {
         try {
@@ -2340,6 +2340,17 @@ app.post('/api/bot', async (req, res) => {
     const [lang, currentStep] = getLangAndStep(reg);
 
     // Common menu commands
+    if (isMenuCommand(text, "menu_customer_support") || text === "/support" || text.includes("Customer Support") || text.includes("የደንበኞች ድጋፍ") || text.includes("Deggersa") || text.includes("ሓገዝ")) {
+        const msg = getMsg(lang, "customer_support_msg");
+        await sendTelegramRequest("sendMessage", {
+            chat_id: chatId,
+            text: msg,
+            parse_mode: "Markdown",
+            reply_markup: await getMenuKeyboard(lang, chatId)
+        });
+        return res.send("OK");
+    }
+
     if (isMenuCommand(text, "menu_change_language") || text === "/language") {
         const msg = getMsg(lang, "welcome_choose_lang");
         await sendTelegramRequest("sendMessage", {

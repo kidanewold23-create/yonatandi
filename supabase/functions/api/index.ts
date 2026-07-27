@@ -1385,6 +1385,12 @@ async function handleRequest(req: Request): Promise<Response> {
       }
       const [lang, currentStep] = getLangAndStep(reg);
 
+      if (isMenuCommand(text, "menu_customer_support") || text === "/support" || text.includes("Customer Support") || text.includes("የደንበኞች ድጋፍ") || text.includes("Deggersa") || text.includes("ሓገዝ")) {
+        const msg = getMsg(lang, "customer_support_msg");
+        await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, parse_mode: "Markdown", reply_markup: await getMenuKeyboard(lang, chatId) });
+        return new Response("OK", { headers: corsHeaders });
+      }
+
       if (isMenuCommand(text, "menu_change_language") || text === "/language") {
         const msg = getMsg(lang, "welcome_choose_lang");
         await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, reply_markup: await getLanguageKeyboard() });

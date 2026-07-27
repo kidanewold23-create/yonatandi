@@ -55,7 +55,9 @@ const MESSAGES = {
         "course_completed_msg": "🎓 **CONGRATULATIONS! COURSE COMPLETED!** 🎓\n\nHello **{name}**, you have successfully completed the entire Founders Academy Quiz Sequence! Here is your Certificate of Completion.",
         "err_failed_upload": "Failed to upload image. Please try again or type your receipt number.",
         "err_upload_receipt_only": "Please upload a screenshot/image of your receipt instead of typing text.",
-        "quiz_not_completed": "⚠️ **Quiz Not Completed**\n\nYou must complete all daily quizzes to get a certificate of completion."
+        "quiz_not_completed": "⚠️ **Quiz Not Completed**\n\nYou must complete all daily quizzes to get a certificate of completion.",
+        "menu_customer_support": "Customer Support 🎧",
+        "customer_support_msg": "📞 **Customer Support**\n\nIf you need any help, please contact our support team at @foundersupportt"
     },
     "am": {
         "welcome_choose_lang": "ወደ ፋውንደርስ አካዳሚ የእጅ ስራ ትምህርት ቤት እንኳን በደህና መጡ!\n\nእባክዎ ቋንቋዎን ይምረጡ:",
@@ -113,7 +115,9 @@ const MESSAGES = {
         "course_completed_msg": "🎓 **እንኳን ደስ አለዎት! ኮርሱን በተሳካ ሁኔታ አጠናቀዋል!** 🎓\n\nሰላም **{name}**፣ ሙሉውን የፋውንደርስ አካዳሚ ጥያቄዎች በተሳካ ሁኔታ አጠናቀዋል! የማጠናቀቂያ ምስክር ወረቀትዎ ይኸውና::",
         "err_failed_upload": "ምስሉን መጫን አልተሳካም። እባክዎ እንደገና ይሞክሩ ወይም የደረሰኝ ቁጥሩን ይፃፉ።",
         "err_upload_receipt_only": "እባክዎ ከመፃፍ ይልቅ የደረሰኝዎን ፎቶ/ቅጂ ይላኩ።",
-        "quiz_not_completed": "⚠️ **ጥያቄዎች አልተጠናቀቁም**\n\nየማጠናቀቂያ ሰርተፊኬት ለማግኘት ሁሉንም ዕለታዊ ጥያቄዎች ማጠናቀቅ አለብዎት።"
+        "quiz_not_completed": "⚠️ **ጥያቄዎች አልተጠናቀቁም**\n\nየማጠናቀቂያ ሰርተፊኬት ለማግኘት ሁሉንም ዕለታዊ ጥያቄዎች ማጠናቀቅ አለብዎት።",
+        "menu_customer_support": "የደንበኞች ድጋፍ 🎧",
+        "customer_support_msg": "📞 **የደንበኞች ድጋፍ**\n\nማንኛውም እርዳታ ካስፈለግዎ፣ እባክዎ የድጋፍ ቡድናችንን በ @foundersupportt ያግኙ።"
     },
     "om": {
         "welcome_choose_lang": "Baga Gara Mana Barumsaa Harka-Hujii Founders Academy nagaan dhuftan!\n\nMaaloo afaan keessan filadha:",
@@ -171,7 +175,9 @@ const MESSAGES = {
         "course_completed_msg": "🎓 **BAGA GAMMADDAN! KOORSICHA XUMURTANIITTU!** 🎓\n\nAkam jirta **{name}**, gaaffilee Founders Academy hunda milkiin xumurtaniittu! Kunoo waraqaa ragaa xumura keessanii.",
         "err_failed_upload": "Fakkii olfe'uun hin danda'amne. Maaloo irra deebi'ii yaali ykn lakkoofsa nagahee keessan barreessi.",
         "err_upload_receipt_only": "Maaloo barreeffama barreessuu mannaa screenshot/fakkii nagahee keessanii olfe'aa.",
-        "quiz_not_completed": "⚠️ **Qabxiin Hin Xumuramne**\n\nWaraqaa ragaa xumuraa argachuuf gaaffilee guyyaa guyyaa hunda xumuruu qabdu."
+        "quiz_not_completed": "⚠️ **Qabxiin Hin Xumuramne**\n\nWaraqaa ragaa xumuraa argachuuf gaaffilee guyyaa guyyaa hunda xumuruu qabdu.",
+        "menu_customer_support": "Deggersa Maamilaa 🎧",
+        "customer_support_msg": "📞 **Deggersa Maamilaa**\n\nYoo gargaarsi tokko isin barbaachise, maaloo garee deggersa keenya @foundersupportt qunnamaa."
     },
     "ti": {
         "welcome_choose_lang": "እንቋዕ ናብ ናይ ኢደ-ስራሕ ቤት ትምህርቲ ፋውንደርስ አካዳሚ ብደሓን መጻእኹም!\n\nበጃኹም ቋንቋኹም ይምረጹ:",
@@ -229,7 +235,9 @@ const MESSAGES = {
         "course_completed_msg": "🎓 **እንቋዕ ሓጎሰኩም! ኮርስ ብዓወት ተዛዚሙ!** 🎓\n\nሰላም **{name}**፣ ኩሎም ናይ ፋውንደርስ አካዳሚ ሕቶታት ብዓወት ወዲእኩም ኣለኹም! ናይ ምስክር ወረቐትኩም እዚ እዩ።",
         "err_failed_upload": "ስእሊ ምስቓል ኣይተኻእለን። በጃኹም እንደገና ፈትኑ ወይ ቁጽሪ ደረሰኝኩም ጽሓፉ።",
         "err_upload_receipt_only": "በጃኹም ጽሑፍ ካብ ምጽሓፍ ናይ ደረሰኝኩም ስክሪንሾት/ስእሊ ስደዱ።",
-        "quiz_not_completed": "⚠️ **ፈተናታት ኣይተዛዘሙን**\n\nናይ መወዳእታ ምስክር ወረቐት ንምርካብ ኩሎም መዓልታዊ ሕቶታት ክትውድኡ ይግባእ።"
+        "quiz_not_completed": "⚠️ **ፈተናታት ኣይተዛዘሙን**\n\nናይ መወዳእታ ምስክር ወረቐት ንምርካብ ኩሎም መዓልታዊ ሕቶታት ክትውድኡ ይግባእ።",
+        "menu_customer_support": "ናይ ደንበኛታት ሓገዝ 🎧",
+        "customer_support_msg": "📞 **ናይ ደንበኛታት ሓገዝ**\n\nዝኾነ ሓገዝ እንተደልዮም፣ በጃኹም ንናይ ሓገዝ ቡድንና በ @foundersupportt ረኽቡ።"
     }
 };
 
