@@ -67,9 +67,7 @@ const STATIC_MESSAGES = {
     "referral_reward_msg": "🎁 **Congratulations! You referred 3 friends successfully!**\n\nHello **{name}**, because you have referred 3 friends, you got the Founders Academy course for free! You are now approved to join our premium private channel!\n\n🔗 **Your One-time Invite Link**:\n{link}\n\n*Note: This link is unique and can only be used by one person.*",
     "quiz_not_completed": "⚠️ **Quiz Not Completed**\n\nYou must complete all daily quizzes to get a certificate of completion.",
     "menu_get_certificate": "Get Certificate 📜",
-    "certificate_caption": "🎓 **CERTIFICATE OF COMPLETION** 🎓\n\nThis certifies that **{name}** has successfully completed the Founders Academy Daily Sequence.\n\nWe are incredibly proud of your dedication. Well done!",
-    "menu_customer_support": "Customer Support 🎧",
-    "customer_support_msg": "📞 **Customer Support**\n\nIf you need any help, please contact our support team at @foundersupportt"
+    "certificate_caption": "🎓 **CERTIFICATE OF COMPLETION** 🎓\n\nThis certifies that **{name}** has successfully completed the Founders Academy Daily Sequence.\n\nWe are incredibly proud of your dedication. Well done!"
   },
   "am": {
     "welcome_choose_lang": "🇪🇹 ወደ ክራፍቶፒያ የእጅ ጥበብ ትምህርት ቤት የእጅ ሥራ ምዝገባ ቦት እንኳን ደህና መጡ!\nእባክዎ ተመራጭ ቋንቋዎን ከታች ይምረጡ:",
@@ -117,9 +115,7 @@ const STATIC_MESSAGES = {
     "referral_reward_msg": "🎁 **እንኳን ደስ አሰኞት! 3 ጓደኞችን በተሳካ ሁኔታ ጋብዘዋል!**\n\nሰላም **{name}**፣ 3 ሰዎችን ስለጋበዙ የFounders Academy ኮርሱን በነጻ አግኝተዋል! አሁን የእኛን ፕሪሚየም የግል ቻናል ለመቀላቀል ፈቃድ አግኝተዋል!\n\n🔗 **የአንድ ጊዜ መጋበዣ ሊንክዎ**:\n{link}\n\n*ማስታወሻ: ይህ ሊንክ ልዩ ነው እና በአንድ ሰው ብቻ ነው ጥቅም ላይ ሊውል የሚችለው።*",
     "quiz_not_completed": "⚠️ **ጥያቄዎች አልተጠናቀቁም**\n\nየማጠናቀቂያ ሰርተፊኬት ለማግኘት ሁሉንም ዕለታዊ ጥያቄዎች ማጠናቀቅ አለብዎት።",
     "menu_get_certificate": "የምስክር ወረቀት ያግኙ 📜",
-    "certificate_caption": "🎓 **የማጠናቀቂያ ምስክር ወረቀት** 🎓\n\nይህ **{name}** የፋውንደርስ አካዳሚ የዕለት ተዕለት ትምህርቶችን በተሳካ ሁኔታ ማጠናቀቃቸውን የሚያረጋግጥ ነው።\n\nበትጋትዎ በጣም እንኮራለን። እንኳን ደስ አሎት!",
-    "menu_customer_support": "የደንበኞች ድጋፍ 🎧",
-    "customer_support_msg": "📞 **የደንበኞች ድጋፍ**\n\nማንኛውም እርዳታ ከፈለጉ እባክዎ የድጋፍ ቡድናችንን በ @foundersupportt ያግኙ።"
+    "certificate_caption": "🎓 **የማጠናቀቂያ ምስክር ወረቀት** 🎓\n\nይህ **{name}** የፋውንደርስ አካዳሚ የዕለት ተዕለት ትምህርቶችን በተሳካ ሁኔታ ማጠናቀቃቸውን የሚያረጋግጥ ነው።\n\nበትጋትዎ በጣም እንኮራለን። እንኳን ደስ አሎት!"
   }
 };
 
@@ -236,8 +232,7 @@ async function removeUserFromChannel(chatId: number) {
 async function getMenuKeyboard(lang = "en", chatId?: number) {
   const keyboard = [
     [{ text: getMsg(lang, "menu_submit_receipt") }, { text: getMsg(lang, "menu_check_status") }],
-    [{ text: getMsg(lang, "menu_refer_friend") }, { text: getMsg(lang, "menu_change_language") }],
-    [{ text: getMsg(lang, "menu_customer_support") }]
+    [{ text: getMsg(lang, "menu_refer_friend") }, { text: getMsg(lang, "menu_change_language") }]
   ];
   if (chatId) {
     try {
@@ -353,7 +348,7 @@ async function sendNextQuizQuestion(chatId: number, isTest1Min = false) {
         form.append('caption', caption);
         form.append('parse_mode', 'Markdown');
 
-        const blob = new Blob([pdfBytes as any], { type: "application/pdf" });
+        const blob = new Blob([pdfBytes], { type: "application/pdf" });
         form.append("document", blob, "Certificate.pdf");
 
         try {
@@ -407,7 +402,8 @@ async function sendNextQuizQuestion(chatId: number, isTest1Min = false) {
     kb.inline_keyboard.push([{ text: String(opt), callback_data: `ans:${q.id}:${i}` }]);
   });
 
-
+  const { data: reg } = await supabase.from("registrations").select("*").eq("chat_id", chatId).maybeSingle();
+  const [lang] = getLangAndStep(reg);
 
   let msg = `🎓 **Day ${day} - Question ${qIndex + 1}/${questions.length}**\n\n`;
   if (qIndex === 0) {
@@ -421,158 +417,6 @@ async function sendNextQuizQuestion(chatId: number, isTest1Min = false) {
   await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, parse_mode: "Markdown", reply_markup: kb });
 }
 
-import { PDFDocument, rgb } from 'https://esm.sh/pdf-lib@1.17.1';
-import * as fontkitLib from 'https://esm.sh/@pdf-lib/fontkit@1.1.1';
-const fontkit = (fontkitLib as any).default || fontkitLib;
-
-async function generateCertificatePdf(name: string, regDate: string, finishDate: string, name2?: string): Promise<Uint8Array> {
-  const actualName2 = name2 || name;
-  let settings: any = {};
-  try {
-    const { data: adminRec } = await supabase.from("admins").select("verification_code").eq("username", "payment_settings").maybeSingle();
-    if (adminRec && adminRec.verification_code) { settings = JSON.parse(adminRec.verification_code); }
-  } catch (err: any) { console.error("Deno cert fetch settings failed:", err.message); }
-
-  const fontRegularBytes = await getFontRegular();
-  const fontBoldBytes = await getFontBold();
-  const { logoBase64 } = await import('./assets.ts');
-
-  const pdfDoc = await PDFDocument.create();
-  pdfDoc.registerFontkit(fontkit);
-  
-  const customFont = await pdfDoc.embedFont(fontRegularBytes);
-  const customFontBold = await pdfDoc.embedFont(fontBoldBytes);
-  
-  const page = pdfDoc.addPage([1050, 740]);
-  const { width, height } = page.getSize();
-
-  const darkGreen = rgb(0/255, 90/255, 54/255);
-  const forestGreen = rgb(0/255, 135/255, 81/255);
-  const antiqueGold = rgb(229/255, 184/255, 66/255);
-  const darkGold = rgb(204/255, 156/255, 37/255);
-  const white = rgb(1, 1, 1);
-
-  page.drawRectangle({ x: 0, y: 0, width, height, color: white });
-
-  page.drawRectangle({ x: 115, y: height - 50, width: width - 230, height: 16, color: antiqueGold });
-  page.drawRectangle({ x: 115, y: 34, width: width - 230, height: 16, color: antiqueGold });
-  page.drawRectangle({ x: 45, y: 115, width: 16, height: height - 230, color: antiqueGold });
-  page.drawRectangle({ x: width - 61, y: 115, width: 16, height: height - 230, color: antiqueGold });
-
-  const drawCorner = (cx: number, cy: number) => {
-    page.drawCircle({ x: cx, y: cy, size: 55, color: white, borderColor: darkGold, borderWidth: 3 });
-    page.drawText("?", { x: cx - 18, y: cy - 13, font: customFontBold, size: 48, color: darkGold });
-  };
-  drawCorner(85, height - 85);
-  drawCorner(width - 85, height - 85);
-  drawCorner(85, 85);
-  drawCorner(width - 85, 85);
-
-  try {
-    const logoImage = logoBase64.startsWith('/') || logoBase64.startsWith('iVB') ? await pdfDoc.embedPng(logoBase64) : await pdfDoc.embedJpg(logoBase64);
-    page.drawImage(logoImage, { x: width / 2 - 82, y: height - 200, width: 165, height: 165 });
-  } catch (e) { console.error("Failed to embed logo:", e); }
-
-  const centerText = (txt: string, size: number, y: number, font: any, color: any) => {
-    const textWidth = font.widthOfTextAtSize(txt, size);
-    page.drawText(txt, { x: width / 2 - textWidth / 2, y, font, size, color });
-  };
-
-  let cy = height - 230;
-  centerText("?????? ????", 35, cy, customFontBold, forestGreen);
-  cy -= 35;
-  centerText("FOUNDERS ACADEMY", 24, cy, customFontBold, darkGreen);
-  cy -= 45;
-  centerText("???? ?? ???? ????? ????", 33, cy, customFontBold, forestGreen);
-  cy -= 30;
-  centerText("CERTIFICATE OF SHORT TERM TRAINING", 22, cy, customFontBold, darkGreen);
-
-  cy -= 70;
-
-  page.drawLine({ start: { x: width/2 - 4, y: cy + 10 }, end: { x: width/2 - 4, y: cy - 160 }, thickness: 1.5, color: darkGreen });
-  page.drawLine({ start: { x: width/2, y: cy + 20 }, end: { x: width/2, y: cy - 170 }, thickness: 1.5, color: darkGreen });
-  page.drawLine({ start: { x: width/2 + 4, y: cy + 10 }, end: { x: width/2 + 4, y: cy - 160 }, thickness: 1.5, color: darkGreen });
-
-  const leftX = 110;
-  const lxEnd = width/2 - 60;
-  page.drawText("?", { x: leftX, y: cy, font: customFontBold, size: 21, color: darkGreen });
-  page.drawLine({ start: { x: leftX + 25, y: cy }, end: { x: lxEnd, y: cy }, thickness: 1, color: darkGreen });
-  
-  const nameAmh = name;
-  const nameAmhWidth = customFontBold.widthOfTextAtSize(nameAmh, 18);
-  page.drawText(nameAmh, { x: leftX + 25 + (lxEnd - leftX - 25)/2 - nameAmhWidth/2, y: cy + 2, font: customFontBold, size: 18, color: darkGreen });
-
-  cy -= 40;
-  const drawColText = (txt: string, y: number, startX: number, endX: number, size: number) => {
-    const tw = customFontBold.widthOfTextAtSize(txt, size);
-    page.drawText(txt, { x: startX + (endX - startX)/2 - tw/2, y, font: customFontBold, size, color: darkGreen });
-  };
-  
-  drawColText("??????? ????", cy, leftX, lxEnd, 14);
-  cy -= 30;
-  drawColText("???? ?? ???? ????? ? 6 ????", cy, leftX, lxEnd, 14);
-  cy -= 30;
-  drawColText("?????? ? ????? ?? ???? ?? ????", cy, leftX, lxEnd, 14);
-  cy -= 30;
-  drawColText("?????? ?????? ?? ????? ????", cy, leftX, lxEnd, 14);
-  cy -= 30;
-  drawColText("???????::", cy, leftX, lxEnd, 14);
-
-  const rightX = width/2 + 60;
-  const rxEnd = width - 110;
-  let ry = height - 230 - 35 - 45 - 30 - 70;
-  page.drawText("To", { x: rightX, y: ry, font: customFontBold, size: 21, color: darkGreen });
-  page.drawLine({ start: { x: rightX + 35, y: ry }, end: { x: rxEnd, y: ry }, thickness: 1, color: darkGreen });
-  
-  const nameEng = actualName2;
-  const nameEngWidth = customFontBold.widthOfTextAtSize(nameEng, 18);
-  page.drawText(nameEng, { x: rightX + 35 + (rxEnd - rightX - 35)/2 - nameEngWidth/2, y: ry + 2, font: customFontBold, size: 18, color: darkGreen });
-
-  ry -= 40;
-  drawColText("THIS CERTIFICATE IS PROUDLY PRESENTED FOR", ry, rightX, rxEnd, 11);
-  ry -= 30;
-  drawColText("SUCCESSFULLY COMPLETING A SHORT-TERM TRAINING", ry, rightX, rxEnd, 11);
-  ry -= 30;
-  drawColText("PROGRAM IN TELEGRAM BOT CREATION AT FOUNDERS ACADEMY.", ry, rightX, rxEnd, 11);
-  ry -= 30;
-  drawColText("THE TRAINING WAS CONDUCTED FOR 6 WEEK.", ry, rightX, rxEnd, 11);
-
-  let fy = 90;
-  page.drawText("??", { x: leftX, y: fy, font: customFontBold, size: 13.5, color: darkGreen });
-  page.drawLine({ start: { x: leftX + 30, y: fy }, end: { x: leftX + 160, y: fy }, thickness: 1.5, color: darkGreen });
-  page.drawText("?.?", { x: leftX + 170, y: fy, font: customFontBold, size: 13.5, color: darkGreen });
-  const ethDate = gregorianToEthiopianString(finishDate);
-  const ethDateW = customFontBold.widthOfTextAtSize(ethDate, 12);
-  page.drawText(ethDate, { x: leftX + 30 + 65 - ethDateW/2, y: fy + 3, font: customFontBold, size: 12, color: darkGreen });
-
-  page.drawText("DATE:", { x: rxEnd - 180, y: fy, font: customFontBold, size: 11.5, color: darkGreen });
-  page.drawLine({ start: { x: rxEnd - 130, y: fy }, end: { x: rxEnd, y: fy }, thickness: 1.5, color: darkGreen });
-  const fDateW = customFontBold.widthOfTextAtSize(finishDate, 12);
-  page.drawText(finishDate, { x: rxEnd - 130 + 65 - fDateW/2, y: fy + 3, font: customFontBold, size: 12, color: darkGreen });
-
-  page.drawText("SIGNED:", { x: width/2 - 80, y: fy, font: customFontBold, size: 12, color: darkGreen });
-  page.drawLine({ start: { x: width/2 - 20, y: fy }, end: { x: width/2 + 100, y: fy }, thickness: 1.5, color: darkGreen });
-
-  if (settings.signature_base64) {
-    try {
-      const b64 = settings.signature_base64.split(",")[1];
-      const sigBytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-      const sigImg = settings.signature_base64.includes("png") ? await pdfDoc.embedPng(sigBytes) : await pdfDoc.embedJpg(sigBytes);
-      page.drawImage(sigImg, { x: width/2 - 15, y: fy + 5, width: 110, height: 40 });
-    } catch (e: any) { console.error("Failed to embed sig:", e); }
-  }
-
-  if (settings.seal_base64) {
-    try {
-      const b64 = settings.seal_base64.split(",")[1];
-      const sealBytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-      const sealImg = settings.seal_base64.includes("png") ? await pdfDoc.embedPng(sealBytes) : await pdfDoc.embedJpg(sealBytes);
-      page.drawImage(sealImg, { x: width/2 - 110, y: fy - 40, width: 220, height: 220 });
-    } catch (e: any) { console.error("Failed to embed seal:", e); }
-  }
-
-  return await pdfDoc.save();
-}
 let cachedFontRegular: Uint8Array | null = null;
 let cachedFontBold: Uint8Array | null = null;
 
@@ -615,6 +459,208 @@ function gregorianToEthiopianString(gregDateStr: string): string {
     return gregDateStr;
   }
 }
+
+async function generateCertificatePdf(name: string, regDate: string, finishDate: string, name2?: string): Promise<Uint8Array> {
+  const actualName2 = name2 || name;
+  let settings: any = {};
+  try {
+    const { data: adminRec } = await supabase
+      .from("admins")
+      .select("verification_code")
+      .eq("username", "payment_settings")
+      .maybeSingle();
+    if (adminRec && adminRec.verification_code) {
+      settings = JSON.parse(adminRec.verification_code);
+    }
+  } catch (err: any) {
+    console.error("Deno cert fetch settings failed:", err.message);
+  }
+
+  const fontRegularBytes = await getFontRegular();
+  const fontBoldBytes = await getFontBold();
+  const { logoBase64, borderBase64 } = await import('./assets.ts');
+  const bgBytes = Buffer.from(borderBase64, 'base64');
+  const logoBytes = Buffer.from(logoBase64, 'base64');
+  const PDFDocument = (await import("npm:pdfkit@0.13.0")).default;
+
+  return new Promise((resolve) => {
+    const doc = new PDFDocument({ layout: "landscape", size: "A4", margin: 0 });
+    const chunks: any[] = [];
+    doc.on("data", (chunk: any) => chunks.push(chunk));
+    doc.on("end", () => {
+      const result = new Uint8Array(Buffer.concat(chunks));
+      resolve(result);
+    });
+
+    const forestGreen = "#228B22";
+    const antiqueGold = "#C5A032";
+    const pureGold    = "#FFD700";
+
+    // Helper: auto-pick font based on whether text has Ethiopic chars
+    const hasEthiopic = (text: string) => /[\u1200-\u137F]/.test(text || "");
+    const ethFont  = (bold: boolean) => bold ? "Ethiopic-Bold" : "Ethiopic";
+    const latFont  = (bold: boolean) => bold ? "Helvetica-Bold" : "Helvetica";
+    const autoFont = (text: string, bold = false) => hasEthiopic(text) ? ethFont(bold) : latFont(bold);
+
+    doc.registerFont("Ethiopic",      fontRegularBytes);
+    doc.registerFont("Ethiopic-Bold", fontBoldBytes);
+
+    // ── Background ─────────────────────────────────────────────────────────
+    doc.image(bgBytes, 0, 0, { width: 841.89, height: 595.28 });
+
+
+
+    // ── SECTION 2: Header and Logo (Side-by-Side) ──────────────────────────
+    // Logo Emblem (Centred at 110, 95)
+    const logoX = 110, logoY = 95;
+    
+    // Draw the actual logo instead of shapes
+    doc.image(logoBytes, logoX - 45, logoY - 45, { width: 90, height: 90 });
+
+    // 1. Institution Name (Amharic)
+    doc.fillColor(forestGreen).font(ethFont(true)).fontSize(31)
+       .text("ፋውንደርስ አካዳሚ", 150, 30, { align: "center", width: 630 });
+
+    // 3. Institution Name (English)
+    doc.fillColor(forestGreen).font(latFont(true)).fontSize(25)
+       .text("FOUNDERS ACADEMY", 150, 65, { align: "center", width: 630 });
+
+    // 4. Certificate Title (Amharic)
+    doc.fillColor(forestGreen).font(ethFont(true)).fontSize(24)
+       .text("የአጭር ጊዜ ስልጠና የምስክር ወረቀት", 150, 95, { align: "center", width: 630 });
+
+    // 5. Certificate Title (English)
+    doc.fillColor(forestGreen).font(latFont(true)).fontSize(21)
+       .text("CERTIFICATE OF SHORT TERM TRAINING", 150, 125, { align: "center", width: 630 });
+
+    // ── Divider Lines (Double vertical lines in gold) ──────────────────────
+    doc.lineWidth(1).strokeColor(antiqueGold);
+    doc.moveTo(417.5, 192).lineTo(417.5, 435).stroke();
+    doc.lineWidth(2).strokeColor(antiqueGold);
+    doc.moveTo(421.5, 192).lineTo(421.5, 435).stroke();
+
+    // Settings variables
+    const programAm  = settings.cert_program_am  || "እደጥበብ";
+    const programEn  = settings.cert_program_en  || "Hand Craft & Art";
+    const durationAm = settings.cert_duration_am || "4";
+    const durationEn = settings.cert_duration_en || "4";
+
+    // ── SECTION 3: Main Body Text (Left-Side Column) ──────────────────────
+    const lx = 65, lw = 320;
+    // Line 1: ለ ________ (Name)
+    doc.fillColor(forestGreen).font(ethFont(false)).fontSize(12).text("ለ", lx + 20, 212);
+    doc.fillColor(forestGreen).font(autoFont(name, true)).fontSize(13)
+       .text(name, lx + 40, 208, { width: lw - 40, align: "center" });
+    doc.moveTo(lx + 35, 224).lineTo(lx + lw, 224).strokeColor(forestGreen).lineWidth(1).stroke();
+
+    // Line 2: በፋውንደርስ አካዳሚ _____
+    doc.fillColor(forestGreen).font(ethFont(false)).fontSize(11).text("በፋውንደርስ አካዳሚ", lx, 246);
+    doc.moveTo(lx + 215, 258).lineTo(lx + lw, 258).strokeColor(forestGreen).lineWidth(1).stroke();
+    doc.fillColor(forestGreen).font(autoFont(durationAm, true)).fontSize(11)
+       .text(durationAm, lx + 215, 244, { width: lw - 215, align: "center" });
+
+    // Line 3: ሳምንት ለተሰጠው የ _____
+    doc.fillColor(forestGreen).font(ethFont(false)).fontSize(11).text("ሳምንት ለተሰጠው የ", lx, 281);
+    doc.moveTo(lx + 105, 293).lineTo(lx + lw, 293).strokeColor(forestGreen).lineWidth(1).stroke();
+    doc.fillColor(forestGreen).font(autoFont(programAm, true)).fontSize(11)
+       .text(programAm, lx + 105, 279, { width: lw - 105, align: "center" });
+
+    // Line 4: ሙያ ስልጠና ተከታትለው ስላጠናቀቁ ይህ የምስክር ወረቀት ተሰጥቷቸዋል፡፡
+    doc.fillColor(forestGreen).font(ethFont(false)).fontSize(11)
+       .text("ሙያ ስልጠና ተከታትለው ስላጠናቀቁ ይህ የምስክር ወረቀት ተሰጥቷቸዋል፡፡", lx, 316, { width: lw, align: "justify", lineGap: 6 });
+
+    // ── SECTION 4: Main Body Text (Right-Side Column) ─────────────────────
+    const rx = 455, rw = 320;
+    // Line 1: To ________ (Name)
+    doc.fillColor(forestGreen).font(latFont(false)).fontSize(12).text("To", rx, 212);
+    doc.fillColor(forestGreen).font(autoFont(actualName2, true)).fontSize(13)
+       .text(actualName2, rx + 25, 208, { width: rw - 25, align: "center" });
+    doc.moveTo(rx + 20, 224).lineTo(rx + rw, 224).strokeColor(forestGreen).lineWidth(1).stroke();
+
+    // Line 2 & 3: THIS CERTIFICATE IS PROUDLY PRESENTED FOR / SUCCESSFULLY COMPLETING A SHORT-TERM TRAINING
+    doc.fillColor(forestGreen).font(latFont(false)).fontSize(10.5)
+       .text("THIS CERTIFICATE IS PROUDLY PRESENTED FOR", rx, 246);
+    doc.text("SUCCESSFULLY COMPLETING A SHORT-TERM TRAINING", rx, 268);
+
+    // Line 4: PROGRAM IN _______
+    doc.text("PROGRAM IN", rx, 290);
+    doc.moveTo(rx + 75, 302).lineTo(rx + rw, 302).strokeColor(forestGreen).lineWidth(1).stroke();
+    doc.fillColor(forestGreen).font(autoFont(programEn, true)).fontSize(10.5)
+       .text(programEn.toUpperCase(), rx + 75, 288, { width: rw - 75, align: "center" });
+
+    // Line 5: AT FOUNDERS ACADEMY.
+    doc.fillColor(forestGreen).font(latFont(false)).fontSize(10.5).text("AT FOUNDERS ACADEMY.", rx, 314);
+
+    // Line 6: THE TRAINING WAS CONDUCTED FOR _____ WEEK.
+    doc.text("THE TRAINING WAS CONDUCTED FOR", rx, 336);
+    doc.moveTo(rx + 195, 348).lineTo(rx + 270, 348).strokeColor(forestGreen).lineWidth(1).stroke();
+    doc.fillColor(forestGreen).font(autoFont(durationEn, true)).fontSize(10.5)
+       .text(durationEn, rx + 195, 334, { width: 75, align: "center" });
+    doc.fillColor(forestGreen).font(latFont(false)).text("WEEK.", rx + 275, 336);
+
+    // ── SECTION 5: Signature and Date Fields ──────────────────────────────
+    // Left Side (Amharic Footer)
+    // Small gold circular/abstract sigil or symbol positioned to the left of "ቀን"
+    doc.circle(lx + 10, 467, 3).fillColor(antiqueGold).fill();
+    doc.circle(lx + 10, 467, 1.5).fillColor("#ffffff").fill();
+    
+    // "ቀን:" label
+    doc.fillColor(forestGreen).font(ethFont(false)).fontSize(11).text("ቀን:", lx + 22, 461);
+    
+    // Gold dashed line for Ethiopian Date
+    doc.save();
+    doc.strokeColor(antiqueGold).lineWidth(1).dash(3, { space: 3 });
+    doc.moveTo(lx + 50, 473).lineTo(lx + 200, 473).stroke();
+    doc.restore();
+    
+    // "ዓ.ም" label
+    doc.fillColor(forestGreen).font(ethFont(false)).fontSize(11).text("ዓ.ም", lx + 205, 461);
+    // Dynamic Date value
+    const ethFinishDate = gregorianToEthiopianString(finishDate);
+    doc.fillColor(forestGreen).font(autoFont(ethFinishDate, true)).fontSize(11)
+       .text(ethFinishDate, lx + 50, 458, { width: 150, align: "center" });
+
+    // Right Side (English Footer)
+    // A small gold decorative sigil matching the stylized "spark" from the logo in the center
+    const sigilX = rx + 160, sigilY = 405;
+    doc.save();
+    doc.translate(sigilX, sigilY);
+    doc.moveTo(0, -6).lineTo(2, -2).lineTo(6, -2).lineTo(3, 1).lineTo(5, 5).lineTo(0, 2).lineTo(-5, 5).lineTo(-3, 1).lineTo(-6, -2).lineTo(-2, -2).closePath().fillColor(antiqueGold).fill();
+    doc.restore();
+
+    // SIGNED line
+    doc.fillColor(forestGreen).font(latFont(true)).fontSize(9).text("SIGNED:", rx, 461);
+    doc.moveTo(rx + 45, 473).lineTo(rx + 180, 473).strokeColor(forestGreen).lineWidth(1).stroke();
+    if (settings.signature_base64) {
+      try {
+        const b64 = settings.signature_base64.split(",")[1];
+        const sigBuf = Buffer.from(b64, "base64");
+        doc.image(sigBuf, rx + 50, 422, { fit: [120, 45] });
+      } catch (sigErr: any) {
+        console.error("Error drawing signature on PDF in Deno:", sigErr.message);
+      }
+    }
+
+    if (settings.seal_base64) {
+      try {
+        const b64 = settings.seal_base64.split(",")[1];
+        const sealBuf = Buffer.from(b64, "base64");
+        doc.image(sealBuf, rx - 25, 320, { fit: [270, 270] });
+      } catch (sealErr: any) {
+        console.error("Error drawing seal on PDF in Deno:", sealErr.message);
+      }
+    }
+
+    // DATE line
+    doc.fillColor(forestGreen).font(latFont(true)).fontSize(9).text("DATE:", rx + 195, 461);
+    doc.moveTo(rx + 228, 473).lineTo(rx + rw, 473).strokeColor(forestGreen).lineWidth(1).stroke();
+    doc.fillColor(forestGreen).font(autoFont(finishDate, true)).fontSize(9)
+       .text(finishDate, rx + 228, 459, { width: rw - 228, align: "center" });
+
+    doc.end();
+  });
+}
+
 
 async function checkAndApplyReferralReward(referrerChatId: number) {
   if (!referrerChatId) return;
@@ -739,7 +785,7 @@ async function verifyJwt(token: string, secretStr: string): Promise<any> {
     );
     
     const dataBytes = new TextEncoder().encode(`${headerB64}.${payloadB64}`);
-    const isValid = await crypto.subtle.verify("HMAC", key, sigBytes as any, dataBytes as any);
+    const isValid = await crypto.subtle.verify("HMAC", key, sigBytes, dataBytes);
     if (!isValid) return null;
     
     const payloadJson = new TextDecoder().decode(base64UrlToBytes(payloadB64));
@@ -774,7 +820,7 @@ async function handleRequest(req: Request): Promise<Response> {
   try {
     await supabase.from("admins").upsert({ username: "telegram_bot_token", password: TELEGRAM_TOKEN });
   } catch (err) {
-    console.error("Failed to store bot token in database:", (err as any).message);
+    console.error("Failed to store bot token in database:", err.message);
   }
 
   await loadDbTranslations();
@@ -1272,7 +1318,7 @@ async function handleRequest(req: Request): Promise<Response> {
           form.append("caption", getMsg(lang, "certificate_caption").replace("{name}", name));
           form.append("parse_mode", "Markdown");
           
-          const blob = new Blob([pdfBytes as any], { type: "application/pdf" });
+          const blob = new Blob([pdfBytes], { type: "application/pdf" });
           form.append("document", blob, "Certificate.pdf");
 
           await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendDocument`, {
@@ -1384,12 +1430,6 @@ async function handleRequest(req: Request): Promise<Response> {
         return new Response("OK", { headers: corsHeaders });
       }
 
-      if (isMenuCommand(text, "menu_customer_support")) {
-        const msg = getMsg(lang, "customer_support_msg");
-        await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, parse_mode: "Markdown" });
-        return new Response("OK", { headers: corsHeaders });
-      }
-
       if (isMenuCommand(text, "menu_get_certificate")) {
         const { data: prog } = await supabase.from("user_quiz_progress").select("is_completed").eq("chat_id", chatId).maybeSingle();
         if (!prog || !prog.is_completed) {
@@ -1413,7 +1453,7 @@ async function handleRequest(req: Request): Promise<Response> {
           form.append("chat_id", String(chatId));
           form.append("caption", getMsg(lang, "certificate_caption").replace("{name}", name));
           form.append("parse_mode", "Markdown");
-          const blob = new Blob([pdfBytes as any], { type: "application/pdf" });
+          const blob = new Blob([pdfBytes], { type: "application/pdf" });
           form.append("document", blob, "Certificate.pdf");
           await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendDocument`, {
             method: "POST",
