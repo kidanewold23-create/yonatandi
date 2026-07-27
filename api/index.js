@@ -486,13 +486,24 @@ function buildStep(lang, step) {
     return `${lang}|${step}`;
 }
 
-function getMenuKeyboard(lang = "en") {
+async function getMenuKeyboard(lang = "en", chatId = null) {
+    const keyboard = [
+        [{ text: getMsg(lang, "menu_submit_receipt") }],
+        [{ text: getMsg(lang, "menu_refer_friend") }, { text: getMsg(lang, "menu_check_status") }],
+        [{ text: getMsg(lang, "menu_change_language") }]
+    ];
+    if (chatId) {
+        try {
+            const prog = await db.getUserQuizProgress(chatId);
+            if (prog && prog.is_completed) {
+                keyboard.unshift([{ text: getMsg(lang, "menu_get_certificate") || "Get Certificate 📜" }]);
+            }
+        } catch (e) {
+            // ignore
+        }
+    }
     return {
-        keyboard: [
-            [{ text: getMsg(lang, "menu_submit_receipt") }],
-            [{ text: getMsg(lang, "menu_refer_friend") }, { text: getMsg(lang, "menu_check_status") }],
-            [{ text: getMsg(lang, "menu_change_language") }]
-        ],
+        keyboard,
         resize_keyboard: true
     };
 }
@@ -2357,7 +2368,7 @@ app.post('/api/bot', async (req, res) => {
             await sendTelegramRequest("sendMessage", {
                 chat_id: chatId,
                 text: getMsg(lang, "no_receipt_yet"),
-                reply_markup: getMenuKeyboard(lang)
+                reply_markup: await getMenuKeyboard(lang, chatId)
             });
             return res.send("OK");
         }
@@ -2366,7 +2377,12 @@ app.post('/api/bot', async (req, res) => {
         const receipt = reg.receipt_number || "Unknown";
         let msg;
         if (status === "approved") {
-            const link = formatInviteLinksForUser(reg.invite_link, lang);
+            let inviteLink = reg.invite_link;
+            if (!inviteLink || !inviteLink.trim() || inviteLink.includes("Error")) {
+                inviteLink = await generateApprovedInviteLinks(reg.chat_id, reg.name, lang);
+                await db.updateRegistrationStatus(reg.id, "approved", inviteLink);
+            }
+            const link = formatInviteLinksForUser(inviteLink, lang);
             msg = getMsg(lang, "status_approved_msg").replace("{receipt}", receipt).replace("{link}", link);
         } else if (status === "declined") {
             const reason = reg.rejection_reason || getMsg(lang, "default_decline_reason");
@@ -2379,8 +2395,58 @@ app.post('/api/bot', async (req, res) => {
             chat_id: chatId,
             text: msg,
             parse_mode: "Markdown",
-            reply_markup: getMenuKeyboard(lang)
+            reply_markup: await getMenuKeyboard(lang, chatId)
         });
+        return res.send("OK");
+    }
+
+    if (isMenuCommand(text, "menu_get_certificate") || text === "/certificate" || text.includes("Certificate") || text.includes("ምስክር ወረቀት")) {
+        const prog = await db.getUserQuizProgress(chatId);
+        if (!prog || !prog.is_completed) {
+            await sendTelegramRequest("sendMessage", {
+                chat_id: chatId,
+                text: getMsg(lang, "quiz_not_completed"),
+                reply_markup: await getMenuKeyboard(lang, chatId)
+            });
+            return res.send("OK");
+        }
+
+        const name = reg ? (reg.name || "Student") : "Student";
+        const name2 = reg ? (reg.name2 || name) : name;
+        const regDateStr = reg ? (reg.created_at || "") : "";
+        
+        let regDate = "Unknown";
+        if (regDateStr) {
+            try { regDate = regDateStr.split("T")[0]; } catch (e) {}
+        }
+        const finishDate = new Date(new Date().getTime() + 3 * 3600000).toISOString().split("T")[0];
+        const caption = getMsg(lang, "course_completed_msg").replace("{name}", name);
+        
+        try {
+            await sendTelegramRequest("sendMessage", { chat_id: chatId, text: "⏳ Generating your PDF Certificate, please wait..." });
+            const pdfBytes = await generateCertificatePdf(name, regDate, finishDate, name2);
+            
+            const FormData = require('form-data');
+            const form = new FormData();
+            form.append('chat_id', chatId);
+            form.append('caption', caption);
+            form.append('parse_mode', 'Markdown');
+            form.append('document', pdfBytes, {
+                filename: 'Certificate.pdf',
+                contentType: 'application/pdf'
+            });
+            
+            const url = `${TELEGRAM_API_URL}/sendDocument`;
+            await axios.post(url, form, { headers: form.getHeaders() });
+            await removeUserFromChannel(chatId);
+        } catch (e) {
+            console.error("Error generating/sending PDF:", e.message);
+            await sendTelegramRequest("sendMessage", {
+                chat_id: chatId,
+                text: `Sorry, there was an error generating your certificate: ${e.message}`,
+                reply_markup: await getMenuKeyboard(lang, chatId)
+            });
+        }
         return res.send("OK");
     }
 
