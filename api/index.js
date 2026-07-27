@@ -598,18 +598,79 @@ function gregorianToEthiopianString(gregDateStr) {
     }
 }
 
-// Generate PDF Certificate Helper using Puppeteer and api/a.html
+async function getPuppeteerBrowser() {
+    // 1. Try @sparticuz/chromium (for Vercel & serverless environments)
+    try {
+        const chromium = require('@sparticuz/chromium');
+        const puppeteerCore = require('puppeteer-core');
+        const execPath = await chromium.executablePath();
+        if (execPath) {
+            return await puppeteerCore.launch({
+                args: chromium.args,
+                defaultViewport: chromium.defaultViewport,
+                executablePath: execPath,
+                headless: chromium.headless,
+            });
+        }
+    } catch (e) {
+        console.warn("@sparticuz/chromium launch check failed:", e.message);
+    }
+
+    // 2. Fall back to standard puppeteer (for local environments)
+    try {
+        const puppeteer = require('puppeteer');
+        return await puppeteer.launch({
+            headless: 'new',
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--single-process', '--no-zygote']
+        });
+    } catch (e) {
+        console.warn("Standard puppeteer launch check failed:", e.message);
+    }
+
+    throw new Error("No compatible Chrome/Chromium binary found for Puppeteer.");
+}
+
+function generatePdfKitCertificate(name, courseTitle, dateStr) {
+    const PDFDocument = require('pdfkit');
+    return new Promise((resolve, reject) => {
+        try {
+            const doc = new PDFDocument({ layout: 'landscape', size: 'A4', margin: 40 });
+            const buffers = [];
+            doc.on('data', b => buffers.push(b));
+            doc.on('end', () => resolve(Buffer.concat(buffers)));
+
+            doc.rect(20, 20, doc.page.width - 40, doc.page.height - 40).lineWidth(3).strokeColor('#008751').stroke();
+            doc.rect(25, 25, doc.page.width - 50, doc.page.height - 50).lineWidth(1).strokeColor('#c09e53').stroke();
+
+            doc.moveDown(2);
+            doc.fontSize(30).fillColor('#005a36').text('CERTIFICATE OF COMPLETION', { align: 'center' });
+            doc.moveDown(1);
+            doc.fontSize(14).fillColor('#333333').text('THIS IS PROUDLY PRESENTED TO', { align: 'center' });
+            doc.moveDown(0.8);
+            doc.fontSize(28).fillColor('#008751').text(name, { align: 'center' });
+            doc.moveDown(0.8);
+            doc.fontSize(15).fillColor('#333333').text(`FOR SUCCESSFULLY COMPLETING THE ${courseTitle.toUpperCase()}`, { align: 'center' });
+            doc.moveDown(1.5);
+            doc.fontSize(12).fillColor('#666666').text(`Completion Date: ${dateStr}`, { align: 'center' });
+            doc.end();
+        } catch (err) {
+            reject(err);
+        }
+    });
+}
+
+// Generate PDF Certificate Helper using Puppeteer and api/a.html (with PDFKit fallback)
 async function generateCertificatePdf(name, regDate, finishDate, name2) {
     const fs = require('fs');
     const path = require('path');
-    const settings = await db.getPaymentSettings();
+    let settings = {};
+    try { settings = await db.getPaymentSettings(); } catch (e) {}
 
     const actualName = name || name2 || "Melese Kebede";
     const courseTitle = settings.cert_program_en || "FACEBOOK ADS TRAINING PROGRAM";
     const dateStr = finishDate || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
     try {
-        const puppeteer = require('puppeteer');
         let templatePath = path.resolve(__dirname, 'a.html');
         if (!fs.existsSync(templatePath)) {
             templatePath = path.resolve(process.cwd(), 'api', 'a.html');
@@ -619,10 +680,7 @@ async function generateCertificatePdf(name, regDate, finishDate, name2) {
         }
 
         const fileUrl = 'file:///' + templatePath.replace(/\\/g, '/');
-        const browser = await puppeteer.launch({
-            headless: 'new',
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
+        const browser = await getPuppeteerBrowser();
         const page = await browser.newPage();
         await page.goto(fileUrl, { waitUntil: 'networkidle0' });
 
@@ -654,8 +712,8 @@ async function generateCertificatePdf(name, regDate, finishDate, name2) {
         await browser.close();
         return pdfBuffer;
     } catch (err) {
-        console.error("Puppeteer PDF generation error:", err.message);
-        throw err;
+        console.warn("Puppeteer PDF generation warning (falling back to PDFKit):", err.message);
+        return await generatePdfKitCertificate(actualName, courseTitle, dateStr);
     }
 }
 
