@@ -150,11 +150,11 @@ async function checkAndApplyReferralReward(referrerChatId) {
 async function getBotUsername() {
     if (BOT_USERNAME) return BOT_USERNAME;
     const res = await sendTelegramRequest("getMe", {});
-    if (res && res.ok) {
+    if (res && res.ok && res.result && res.result.username) {
         BOT_USERNAME = res.result.username;
         return BOT_USERNAME;
     }
-    return "Founders AcademyBot";
+    return "FoundersAcademyBot";
 }
 
 async function setupBotCommands() {

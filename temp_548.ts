@@ -1,7 +1,6 @@
-import PDFDocument from "npm:pdfkit@0.13.0";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
-import { borderBase64 } from "./assets.ts";
+import PDFDocument from "npm:pdfkit@0.13.0";
 import { Buffer } from "https://deno.land/std@0.168.0/node/buffer.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
@@ -24,104 +23,100 @@ const corsHeaders = {
 // Static Messages fallback
 const STATIC_MESSAGES = {
   "en": {
-    "welcome_choose_lang": "🇬🇧 Welcome to Founders Academy Hand Craft School Registration Bot!\nPlease select your preferred language below:",
-    "ask_name": "📝 Please enter your full name:",
-    "ask_name_am": "📝 Please enter your **Full Name in Amharic** (e.g. አበበ በሶ):",
-    "ask_name_en": "📝 Please enter your **Full Name in English** (e.g. Abebe Beso):",
-    "invalid_name": "❌ Name cannot be empty. Please enter your name:",
-    "ask_phone": "📞 Please share your phone number using the button below or type it:",
-    "btn_share_contact": "Share Contact 📞",
-    "phone_saved": "✅ Phone number saved successfully!",
-    "duplicate_phone": "❌ This phone number is already registered. Please use another phone number.",
-    "invalid_phone": "❌ Invalid phone number. Please enter a valid number:",
-    "ask_payment_method": "💳 Please select your preferred payment method:",
-    "btn_telebirr": "Telebirr 📱",
-    "btn_cbe": "CBE 🏦",
-    "select_payment_method_first": "❌ Please select a payment method from the buttons above.",
-    "telebirr_payment_instructions": "📱 **Telebirr Payment Instructions**\n\n1. Pay **{amount} Birr** to:\n   - **Merchant Name**: {acc_name}\n   - **Merchant Number**: `{acc_num}`\n\n2. Once paid, please upload your receipt photo or type the Transaction ID below.",
-    "cbe_payment_instructions": "🏦 **CBE Bank Transfer Instructions**\n\n1. Transfer **{amount} Birr** to:\n   - **Account Name**: {acc_name}\n   - **Account Number**: `{acc_num}`\n\n2. Once transferred, please upload your receipt photo or type the Transaction ID below.",
-    "ask_receipt_number": "🧾 Please upload a photo of the receipt or type the receipt number:",
-    "registration_submitted": "🎉 **Registration Submitted Successfully!**\n\nWe are verifying your receipt. You will receive a notification here once approved. Thank you! 🙏",
-    "menu_submit_receipt": "Submit Receipt 🧾",
-    "menu_check_status": "Check Status 🔍",
-    "menu_refer_friend": "Refer Friends 👥",
-    "menu_change_language": "Change Language 🌐",
-    "status_pending": "Pending Verification ⏳",
-    "status_approved": "Approved ✅",
-    "status_declined": "Declined ❌",
+    "welcome_choose_lang": "≡ƒç¼≡ƒçº Welcome to Founders Academy Hand Craft School Registration Bot!\nPlease select your preferred language below:",
+    "ask_name": "≡ƒô¥ Please enter your full name:",
+    "ask_name_am": "≡ƒô¥ Please enter your **Full Name in Amharic** (e.g. ßèáßëáßëá ßëáßê╢):",
+    "ask_name_en": "≡ƒô¥ Please enter your **Full Name in English** (e.g. Abebe Beso):",
+    "invalid_name": "Γ¥î Name cannot be empty. Please enter your name:",
+    "ask_phone": "≡ƒô₧ Please share your phone number using the button below or type it:",
+    "btn_share_contact": "Share Contact ≡ƒô₧",
+    "phone_saved": "Γ£à Phone number saved successfully!",
+    "duplicate_phone": "Γ¥î This phone number is already registered. Please use another phone number.",
+    "invalid_phone": "Γ¥î Invalid phone number. Please enter a valid number:",
+    "ask_payment_method": "≡ƒÆ│ Please select your preferred payment method:",
+    "btn_telebirr": "Telebirr ≡ƒô▒",
+    "btn_cbe": "CBE ≡ƒÅª",
+    "select_payment_method_first": "Γ¥î Please select a payment method from the buttons above.",
+    "telebirr_payment_instructions": "≡ƒô▒ **Telebirr Payment Instructions**\n\n1. Pay **{amount} Birr** to:\n   - **Merchant Name**: {acc_name}\n   - **Merchant Number**: `{acc_num}`\n\n2. Once paid, please upload your receipt photo or type the Transaction ID below.",
+    "cbe_payment_instructions": "≡ƒÅª **CBE Bank Transfer Instructions**\n\n1. Transfer **{amount} Birr** to:\n   - **Account Name**: {acc_name}\n   - **Account Number**: `{acc_num}`\n\n2. Once transferred, please upload your receipt photo or type the Transaction ID below.",
+    "ask_receipt_number": "≡ƒº╛ Please upload a photo of the receipt or type the receipt number:",
+    "registration_submitted": "≡ƒÄë **Registration Submitted Successfully!**\n\nWe are verifying your receipt. You will receive a notification here once approved. Thank you! ≡ƒÖÅ",
+    "menu_submit_receipt": "Submit Receipt ≡ƒº╛",
+    "menu_check_status": "Check Status ≡ƒöì",
+    "menu_refer_friend": "Refer Friends ≡ƒæÑ",
+    "menu_change_language": "Change Language ≡ƒîÉ",
+    "status_pending": "Pending Verification ΓÅ│",
+    "status_approved": "Approved Γ£à",
+    "status_declined": "Declined Γ¥î",
     "no_receipt_yet": "You haven't submitted any receipts yet. Type /start to begin.",
-    "already_pending": "⚠️ You already have a pending registration. Please wait for approval.",
-    "referral_message": "👥 **Refer and Earn!**\n\nShare your link with friends. When they register and get approved, you get credit!\n\n🔗 **Your referral link**:\n{ref_link}",
+    "already_pending": "ΓÜá∩╕Å You already have a pending registration. Please wait for approval.",
+    "referral_message": "≡ƒæÑ **Refer and Earn!**\n\nShare your link with friends. When they register and get approved, you get credit!\n\n≡ƒöù **Your referral link**:\n{ref_link}",
     "ready_new_receipt": "Ready to submit a new receipt? Please select payment method below:",
-    "payment_saved": "✅ Payment method saved!",
-    "help_instructions": "ℹ️ **Founders Academy Bot Help**\n\n- Use /start to begin registration.\n- Use the menu buttons to submit receipts, refer friends, check status, or change language.",
+    "payment_saved": "Γ£à Payment method saved!",
+    "help_instructions": "Γä╣∩╕Å **Founders Academy Bot Help**\n\n- Use /start to begin registration.\n- Use the menu buttons to submit receipts, refer friends, check status, or change language.",
     "already_registered": "You have already registered. Please use the menu below to check your status or refer friends.",
-    "status_approved_msg": "🎉 **Your registration is approved!**\nReceipt: `{receipt}`\n\n🔗 Join our Private Channel here:\n{link}",
-    "status_declined_msg": "❌ **Your registration was declined.**\nReceipt: `{receipt}`\n\n⚠️ **Reason**: {reason}",
-    "status_pending_msg": "⏳ **Your registration is pending review.**\nReceipt: `{receipt}`\n\nWe will notify you once approved.",
+    "status_approved_msg": "≡ƒÄë **Your registration is approved!**\nReceipt: `{receipt}`\n\n≡ƒöù Join our Private Channel here:\n{link}",
+    "status_declined_msg": "Γ¥î **Your registration was declined.**\nReceipt: `{receipt}`\n\nΓÜá∩╕Å **Reason**: {reason}",
+    "status_pending_msg": "ΓÅ│ **Your registration is pending review.**\nReceipt: `{receipt}`\n\nWe will notify you once approved.",
     "default_decline_reason": "Details do not match our records.",
-    "last_approved_msg": "Your last registration is approved ✅\nHere is your link: {link}\n\nYou can use the menu buttons below to submit another receipt or refer friends!",
+    "last_approved_msg": "Your last registration is approved Γ£à\nHere is your link: {link}\n\nYou can use the menu buttons below to submit another receipt or refer friends!",
     "last_declined_msg": "Your last registration was declined. You can submit another receipt using the menu below.",
     "last_pending_msg": "Your registration is currently pending review. We will notify you once approved.",
     "welcome_name_prefix": "Hello {name}! ",
-    "receipt_approved_msg": "🎉 **Receipt Verification Approved!**\n\nHello **{name}**, your receipt `{receipt}` has been verified successfully. You are now approved to join our premium private channel!\n\n🔗 **Your One-time Invite Link**:\n{link}\n\n*Note: This link is unique and can only be used by one person.*",
-    "receipt_declined_msg": "❌ **Receipt Verification Declined**\n\nHello **{name}**, we are sorry, but your receipt `{receipt}` has been declined.\n\n⚠️ **Reason**: {reason}",
-    "referral_reward_msg": "🎁 **Congratulations! You referred 3 friends successfully!**\n\nHello **{name}**, because you have referred 3 friends, you got the Founders Academy course for free! You are now approved to join our premium private channel!\n\n🔗 **Your One-time Invite Link**:\n{link}\n\n*Note: This link is unique and can only be used by one person.*",
-    "quiz_not_completed": "⚠️ **Quiz Not Completed**\n\nYou must complete all daily quizzes to get a certificate of completion.",
-    "menu_get_certificate": "Get Certificate 📜",
-    "certificate_caption": "🎓 **CERTIFICATE OF COMPLETION** 🎓\n\nThis certifies that **{name}** has successfully completed the Founders Academy Daily Sequence.\n\nWe are incredibly proud of your dedication. Well done!",
-    "menu_customer_support": "Customer Support 🎧",
-    "customer_support_msg": "📞 **Customer Support**\n\nIf you need any help, please contact our support team at @foundersupportt"
+    "receipt_approved_msg": "≡ƒÄë **Receipt Verification Approved!**\n\nHello **{name}**, your receipt `{receipt}` has been verified successfully. You are now approved to join our premium private channel!\n\n≡ƒöù **Your One-time Invite Link**:\n{link}\n\n*Note: This link is unique and can only be used by one person.*",
+    "receipt_declined_msg": "Γ¥î **Receipt Verification Declined**\n\nHello **{name}**, we are sorry, but your receipt `{receipt}` has been declined.\n\nΓÜá∩╕Å **Reason**: {reason}",
+    "referral_reward_msg": "≡ƒÄü **Congratulations! You referred 3 friends successfully!**\n\nHello **{name}**, because you have referred 3 friends, you got the Founders Academy course for free! You are now approved to join our premium private channel!\n\n≡ƒöù **Your One-time Invite Link**:\n{link}\n\n*Note: This link is unique and can only be used by one person.*",
+    "quiz_not_completed": "ΓÜá∩╕Å **Quiz Not Completed**\n\nYou must complete all daily quizzes to get a certificate of completion.",
+    "menu_get_certificate": "Get Certificate ≡ƒô£",
+    "certificate_caption": "≡ƒÄô **CERTIFICATE OF COMPLETION** ≡ƒÄô\n\nThis certifies that **{name}** has successfully completed the Founders Academy Daily Sequence.\n\nWe are incredibly proud of your dedication. Well done!"
   },
   "am": {
-    "welcome_choose_lang": "🇪🇹 ወደ ክራፍቶፒያ የእጅ ጥበብ ትምህርት ቤት የእጅ ሥራ ምዝገባ ቦት እንኳን ደህና መጡ!\nእባክዎ ተመራጭ ቋንቋዎን ከታች ይምረጡ:",
-    "ask_name": "📝 እባክዎን ሙሉ ስምዎን ያስገቡ:",
-    "ask_name_am": "📝 እባክዎ **ሙሉ ስምዎን በአማርኛ** ያስገቡ (ምሳሌ፡ አበበ በሶ):",
-    "ask_name_en": "📝 እባክዎ **ሙሉ ስምዎን በእንግሊዝኛ** ያስገቡ (ምሳሌ፡ Abebe Beso):",
-    "invalid_name": "❌ ስም ባዶ መሆን አይችልም። እባክዎን ስምዎን ያስገቡ:",
-    "ask_phone": "📞 እባክዎን ከታች ያለውን ቁልፍ በመጫን ስልክ ቁጥርዎን ያጋሩ ወይም ይፃፉ:",
-    "btn_share_contact": "ስልክ ቁጥር አጋራ 📞",
-    "phone_saved": "✅ ስልክ ቁጥርዎ በተሳካ ሁኔታ ተቀምጧል!",
-    "duplicate_phone": "❌ ይህ ስልክ ቁጥር ቀድሞ ተመዝግቧል። እባክዎ ሌላ ስልክ ቁጥር ይጠቀሙ።",
-    "invalid_phone": "❌ የተሳሳተ ስልክ ቁጥር። እባክዎ ትክክለኛ ቁጥር ያስገቡ:",
-    "ask_payment_method": "💳 እባክዎ ተመራጭ የክፍያ ዘዴዎን ይምረጡ:",
-    "btn_telebirr": "ቴሌብር 📱",
-    "btn_cbe": "የኢትዮጵያ ንግድ ባንክ 🏦",
-    "select_payment_method_first": "❌ እባክዎ ክፍያ ለመፈጸም ከላይ ካሉት አማራጮች አንዱን ይምረጡ።",
-    "telebirr_payment_instructions": "📱 **የቴሌብር ክፍያ መመሪያ**\n\n1. **{amount} ብር** ወደዚህ ይክፈሉ:\n   - **የነጋዴ ስም**: {acc_name}\n   - **የነጋዴ ቁጥር**: `{acc_num}`\n\nክፍያውን ከፈጸሙ በኋላ፣ እባክዎ የደረሰኝዎን ፎቶ ወይም ስክሪንሾት ከታች ይላኩ:",
-    "cbe_payment_instructions": "🏦 **የኢትዮጵያ ንግድ ባንክ የክፍያ መመሪያ**\n\n1. **{amount} ብር** ወደዚህ ያስተላልፉ:\n   - **የአካውንት ስም**: {acc_name}\n   - **የአካውንት ቁጥር**: `{acc_num}`\n\nክፍያውን ከፈጸሙ በኋላ፣ እባክዎ የደረሰኝዎን ፎቶ ወይም ስክሪንሾት ከታች ይላኩ:",
-    "ask_receipt_number": "🧾 እባክዎን የደረሰኝ ፎቶ ይጫኑ ወይም የደረሰኝ ቁጥሩን ይፃፉ:",
-    "registration_submitted": "🎉 **ምዝገባዎ በተሳካ ሁኔታ ቀርቧል!**\n\nደረሰኝዎን እያረጋገጥን ነው። አንዴ ሲፈቀድ እዚህ ማሳወቂያ ይደርስዎታል። እናመሰግናለን! 🙏",
-    "menu_submit_receipt": "ደረሰኝ አስገባ 🧾",
-    "menu_check_status": "ሁኔታ ማረጋገጫ 🔍",
-    "menu_refer_friend": "ጓደኛ ጋብዝ 👥",
-    "menu_change_language": "ቋንቋ ቀይር 🌐",
-    "status_pending": "በመጠባበቅ ላይ ⏳",
-    "status_approved": "ጸድቋል ✅",
-    "status_declined": "ውድቅ ተደርጓል ❌",
-    "no_receipt_yet": "እስካሁን ምንም ደረሰኝ አላስገቡም። ለመጀመር /start ብለው ይፃፉ።",
-    "already_pending": "⚠️ ቀድሞውኑ በመጠባበቅ ላይ ያለ ምዝገባ አለዎት። እባክዎ እስኪፈቀድ ይጠብቁ።",
-    "referral_message": "👥 **ይጋብዙ እና ያግኙ!**\n\nየመጋበዣ ሊንክዎን ለጓደኞችዎ ያጋሩ። እነሱ ሲመዘገቡ እና ሲፈቀድላቸው እርስዎ ክሬዲት ያገኛሉ!\n\n🔗 **የእርስዎ መጋበዣ ሊንክ**:\n{ref_link}",
-    "ready_new_receipt": "አዲስ ደረሰኝ ለማስገባት ዝግጁ ነዎት? እባክዎ ከታች የክፍያ ዘዴ ይምረጡ:",
-    "payment_saved": "✅ የክፍያ ዘዴ ተቀምጧል!",
-    "help_instructions": "ℹ️ **የክራፍቶፒያ ቦት እርዳታ**\n\n- ለመመዝገብ /start ይጠቀሙ።\n- ደረሰኝ ለማስገባት፣ ጓደኞችን ለመጋበዝ፣ ሁኔታን ለማረጋገጥ ወይም ቋንቋ ለመቀየር የማውጫ ቁልፎችን ይጠቀሙ።",
-    "already_registered": "ቀድሞውኑ ተመዝግበዋል። እባክዎ ሁኔታዎን ለማረጋገጥ ወይም ጓደኞችን ለመጋበዝ ከታች ያለውን ማውጫ ይጠቀሙ።",
-    "status_approved_msg": "🎉 **ምዝገባዎ ጸድቋል!**\nደረሰኝ: `{receipt}`\n\n🔗 የእኛን ፕሪሚየም ቻናል ለመቀላቀል ይህንን ሊንክ ይጫኑ:\n{link}",
-    "status_declined_msg": "❌ **ምዝገባዎ ውድቅ ተደርጓል።**\nደረሰኝ: `{receipt}`\n\n⚠️ **ምክንያት**: {reason}",
-    "status_pending_msg": "⏳ **ምዝገባዎ በመጠባበቅ ላይ ነው።**\nደረሰኝ: `{receipt}`\n\nሲፈቀድ እናሳውቆታለን።",
-    "default_decline_reason": "ያስገቡት መረጃ ከእኛ መዝገብ ጋር አይዛመድም።",
-    "last_approved_msg": "የመጨረሻ ምዝገባዎ ጸድቋል ✅\nሊንክዎ ይኸውና: {link}\n\nሌላ ደረሰኝ ለማስገባት ወይም ጓደኞችን ለመጋበዝ ከታች ያሉትን የማውጫ አዝራሮች መጠቀም ይችላሉ!",
-    "last_declined_msg": "የመጨረሻ ምዝገባዎ ተቀባይነት አላገኘም። ከታች ያለውን ማውጫ በመጠቀም ሌላ ደረሰኝ ማስገባት ይችላሉ።",
-    "last_pending_msg": "ምዝገባዎ በአሁኑ ጊዜ በመጠባበቅ ላይ ነው። ሲፈቀድ እናሳውቆታለን።",
-    "welcome_name_prefix": "ሰላም {name}! ",
-    "receipt_approved_msg": "🎉 **የደረሰኝ ማረጋገጫ ጸድቋል!**\n\nሰላም **{name}**፣ የደረሰኝ ቁጥርዎ `{receipt}` በተሳካ ሁኔታ ተረጋግጧል። አሁን የእኛን ፕሪሚየም የግል ቻናል ለመቀላቀል ፈቃድ አግኝተዋል!\n\n🔗 **የአንድ ጊዜ መጋበዣ ሊንክዎ**:\n{link}\n\n*ማስታወሻ: ይህ ሊንክ ልዩ ነው እና በአንድ ሰው ብቻ ነው ጥቅም ላይ ሊውል የሚችለው።*",
-    "receipt_declined_msg": "❌ **የደረሰኝ ማረጋገጫ ተቀባይነት አላገኘም**\n\nሰላም **{name}**፣ የደረሰኝ ቁጥርዎ `{receipt}` ውድቅ ተደርጓል።\n\n⚠️ **ምክንያት**: {reason}",
-    "referral_reward_msg": "🎁 **እንኳን ደስ አሰኞት! 3 ጓደኞችን በተሳካ ሁኔታ ጋብዘዋል!**\n\nሰላም **{name}**፣ 3 ሰዎችን ስለጋበዙ የFounders Academy ኮርሱን በነጻ አግኝተዋል! አሁን የእኛን ፕሪሚየም የግል ቻናል ለመቀላቀል ፈቃድ አግኝተዋል!\n\n🔗 **የአንድ ጊዜ መጋበዣ ሊንክዎ**:\n{link}\n\n*ማስታወሻ: ይህ ሊንክ ልዩ ነው እና በአንድ ሰው ብቻ ነው ጥቅም ላይ ሊውል የሚችለው።*",
-    "quiz_not_completed": "⚠️ **ጥያቄዎች አልተጠናቀቁም**\n\nየማጠናቀቂያ ሰርተፊኬት ለማግኘት ሁሉንም ዕለታዊ ጥያቄዎች ማጠናቀቅ አለብዎት።",
-    "menu_get_certificate": "የምስክር ወረቀት ያግኙ 📜",
-    "certificate_caption": "🎓 **የማጠናቀቂያ ምስክር ወረቀት** 🎓\n\nይህ **{name}** የፋውንደርስ አካዳሚ የዕለት ተዕለት ትምህርቶችን በተሳካ ሁኔታ ማጠናቀቃቸውን የሚያረጋግጥ ነው።\n\nበትጋትዎ በጣም እንኮራለን። እንኳን ደስ አሎት!",
-    "menu_customer_support": "የደንበኞች ድጋፍ 🎧",
-    "customer_support_msg": "📞 **የደንበኞች ድጋፍ**\n\nማንኛውም እርዳታ ከፈለጉ እባክዎ የድጋፍ ቡድናችንን በ @foundersupportt ያግኙ።"
+    "welcome_choose_lang": "≡ƒç¬≡ƒç╣ ßïêßï░ ßè¡ßê½ßììßë╢ßìÆßï½ ßï¿ßèÑßîà ßîÑßëáßëÑ ßë╡ßê¥ßêàßê¡ßë╡ ßëñßë╡ ßï¿ßèÑßîà ßêÑßê½ ßê¥ßï¥ßîêßëú ßëªßë╡ ßèÑßèòßè│ßèò ßï░ßêàßèô ßêÿßîí!\nßèÑßëúßè¡ßïÄ ßë░ßêÿßê½ßî¡ ßëïßèòßëïßïÄßèò ßè¿ßë│ßë╜ ßï¡ßê¥ßê¿ßîí:",
+    "ask_name": "≡ƒô¥ ßèÑßëúßè¡ßïÄßèò ßêÖßêë ßê╡ßê¥ßïÄßèò ßï½ßê╡ßîêßëí:",
+    "ask_name_am": "≡ƒô¥ ßèÑßëúßè¡ßïÄ **ßêÖßêë ßê╡ßê¥ßïÄßèò ßëáßèáßê¢ßê¡ßè¢** ßï½ßê╡ßîêßëí (ßê¥ßê│ßêîßìí ßèáßëáßëá ßëáßê╢):",
+    "ask_name_en": "≡ƒô¥ ßèÑßëúßè¡ßïÄ **ßêÖßêë ßê╡ßê¥ßïÄßèò ßëáßèÑßèòßîìßêèßï¥ßè¢** ßï½ßê╡ßîêßëí (ßê¥ßê│ßêîßìí Abebe Beso):",
+    "invalid_name": "Γ¥î ßê╡ßê¥ ßëúßï╢ ßêÿßêåßèò ßèáßï¡ßë╜ßêìßê¥ßìó ßèÑßëúßè¡ßïÄßèò ßê╡ßê¥ßïÄßèò ßï½ßê╡ßîêßëí:",
+    "ask_phone": "≡ƒô₧ ßèÑßëúßè¡ßïÄßèò ßè¿ßë│ßë╜ ßï½ßêêßïìßèò ßëüßêìßìì ßëáßêÿßî½ßèò ßê╡ßêìßè¡ ßëüßîÑßê¡ßïÄßèò ßï½ßîïßê⌐ ßïêßï¡ßê¥ ßï¡ßìâßìë:",
+    "btn_share_contact": "ßê╡ßêìßè¡ ßëüßîÑßê¡ ßèáßîïßê½ ≡ƒô₧",
+    "phone_saved": "Γ£à ßê╡ßêìßè¡ ßëüßîÑßê¡ßïÄ ßëáßë░ßê│ßè½ ßêüßèößë│ ßë░ßëÇßê¥ßîºßêì!",
+    "duplicate_phone": "Γ¥î ßï¡ßêà ßê╡ßêìßè¡ ßëüßîÑßê¡ ßëÇßï╡ßê₧ ßë░ßêÿßï¥ßîìßëºßêìßìó ßèÑßëúßè¡ßïÄ ßêîßêï ßê╡ßêìßè¡ ßëüßîÑßê¡ ßï¡ßîáßëÇßêÖßìó",
+    "invalid_phone": "Γ¥î ßï¿ßë░ßê│ßê│ßë░ ßê╡ßêìßè¡ ßëüßîÑßê¡ßìó ßèÑßëúßè¡ßïÄ ßë╡ßè¡ßè¡ßêêßè¢ ßëüßîÑßê¡ ßï½ßê╡ßîêßëí:",
+    "ask_payment_method": "≡ƒÆ│ ßèÑßëúßè¡ßïÄ ßë░ßêÿßê½ßî¡ ßï¿ßè¡ßììßï½ ßïÿßï┤ßïÄßèò ßï¡ßê¥ßê¿ßîí:",
+    "btn_telebirr": "ßë┤ßêîßëÑßê¡ ≡ƒô▒",
+    "btn_cbe": "ßï¿ßèóßë╡ßï«ßî╡ßï½ ßèòßîìßï╡ ßëúßèòßè¡ ≡ƒÅª",
+    "select_payment_method_first": "Γ¥î ßèÑßëúßè¡ßïÄ ßè¡ßììßï½ ßêêßêÿßìêßî╕ßê¥ ßè¿ßêïßï¡ ßè½ßêëßë╡ ßèáßê¢ßê½ßî«ßë╜ ßèáßèòßï▒ßèò ßï¡ßê¥ßê¿ßîíßìó",
+    "telebirr_payment_instructions": "≡ƒô▒ **ßï¿ßë┤ßêîßëÑßê¡ ßè¡ßììßï½ ßêÿßêÿßê¬ßï½**\n\n1. **{amount} ßëÑßê¡** ßïêßï░ßïÜßêà ßï¡ßè¡ßìêßêë:\n   - **ßï¿ßèÉßîïßï┤ ßê╡ßê¥**: {acc_name}\n   - **ßï¿ßèÉßîïßï┤ ßëüßîÑßê¡**: `{acc_num}`\n\nßè¡ßììßï½ßïìßèò ßè¿ßìêßî╕ßêÖ ßëáßèïßêïßìú ßèÑßëúßè¡ßïÄ ßï¿ßï░ßê¿ßê░ßè¥ßïÄßèò ßìÄßë╢ ßïêßï¡ßê¥ ßê╡ßè¡ßê¬ßèòßê╛ßë╡ ßè¿ßë│ßë╜ ßï¡ßêïßè⌐:",
+    "cbe_payment_instructions": "≡ƒÅª **ßï¿ßèóßë╡ßï«ßî╡ßï½ ßèòßîìßï╡ ßëúßèòßè¡ ßï¿ßè¡ßììßï½ ßêÿßêÿßê¬ßï½**\n\n1. **{amount} ßëÑßê¡** ßïêßï░ßïÜßêà ßï½ßê╡ßë░ßêïßêìßìë:\n   - **ßï¿ßèáßè½ßïìßèòßë╡ ßê╡ßê¥**: {acc_name}\n   - **ßï¿ßèáßè½ßïìßèòßë╡ ßëüßîÑßê¡**: `{acc_num}`\n\nßè¡ßììßï½ßïìßèò ßè¿ßìêßî╕ßêÖ ßëáßèïßêïßìú ßèÑßëúßè¡ßïÄ ßï¿ßï░ßê¿ßê░ßè¥ßïÄßèò ßìÄßë╢ ßïêßï¡ßê¥ ßê╡ßè¡ßê¬ßèòßê╛ßë╡ ßè¿ßë│ßë╜ ßï¡ßêïßè⌐:",
+    "ask_receipt_number": "≡ƒº╛ ßèÑßëúßè¡ßïÄßèò ßï¿ßï░ßê¿ßê░ßè¥ ßìÄßë╢ ßï¡ßî½ßèæ ßïêßï¡ßê¥ ßï¿ßï░ßê¿ßê░ßè¥ ßëüßîÑßê⌐ßèò ßï¡ßìâßìë:",
+    "registration_submitted": "≡ƒÄë **ßê¥ßï¥ßîêßëúßïÄ ßëáßë░ßê│ßè½ ßêüßèößë│ ßëÇßê¡ßëºßêì!**\n\nßï░ßê¿ßê░ßè¥ßïÄßèò ßèÑßï½ßê¿ßîïßîêßîÑßèò ßèÉßïìßìó ßèáßèòßï┤ ßê▓ßìêßëÇßï╡ ßèÑßïÜßêà ßê¢ßê│ßïêßëéßï½ ßï¡ßï░ßê¡ßê╡ßïÄßë│ßêìßìó ßèÑßèôßêÿßê░ßîìßèôßêêßèò! ≡ƒÖÅ",
+    "menu_submit_receipt": "ßï░ßê¿ßê░ßè¥ ßèáßê╡ßîêßëú ≡ƒº╛",
+    "menu_check_status": "ßêüßèößë│ ßê¢ßê¿ßîïßîêßî½ ≡ƒöì",
+    "menu_refer_friend": "ßîôßï░ßè¢ ßîïßëÑßï¥ ≡ƒæÑ",
+    "menu_change_language": "ßëïßèòßëï ßëÇßï¡ßê¡ ≡ƒîÉ",
+    "status_pending": "ßëáßêÿßîáßëúßëáßëà ßêïßï¡ ΓÅ│",
+    "status_approved": "ßî╕ßï╡ßëïßêì Γ£à",
+    "status_declined": "ßïìßï╡ßëà ßë░ßï░ßê¡ßîôßêì Γ¥î",
+    "no_receipt_yet": "ßèÑßê╡ßè½ßêüßèò ßê¥ßèòßê¥ ßï░ßê¿ßê░ßè¥ ßèáßêïßê╡ßîêßëíßê¥ßìó ßêêßêÿßîÇßêÿßê¡ /start ßëÑßêêßïì ßï¡ßìâßìëßìó",
+    "already_pending": "ΓÜá∩╕Å ßëÇßï╡ßê₧ßïìßèæ ßëáßêÿßîáßëúßëáßëà ßêïßï¡ ßï½ßêê ßê¥ßï¥ßîêßëú ßèáßêêßïÄßë╡ßìó ßèÑßëúßè¡ßïÄ ßèÑßê╡ßè¬ßìêßëÇßï╡ ßï¡ßîáßëÑßëüßìó",
+    "referral_message": "≡ƒæÑ **ßï¡ßîïßëÑßïÖ ßèÑßèô ßï½ßîìßèÖ!**\n\nßï¿ßêÿßîïßëáßïú ßêèßèòßè¡ßïÄßèò ßêêßîôßï░ßè₧ßë╜ßïÄ ßï½ßîïßê⌐ßìó ßèÑßèÉßê▒ ßê▓ßêÿßïÿßîêßëí ßèÑßèô ßê▓ßìêßëÇßï╡ßêïßë╕ßïì ßèÑßê¡ßê╡ßïÄ ßè¡ßê¼ßï▓ßë╡ ßï½ßîêßè¢ßêë!\n\n≡ƒöù **ßï¿ßèÑßê¡ßê╡ßïÄ ßêÿßîïßëáßïú ßêèßèòßè¡**:\n{ref_link}",
+    "ready_new_receipt": "ßèáßï▓ßê╡ ßï░ßê¿ßê░ßè¥ ßêêßê¢ßê╡ßîêßëúßë╡ ßï¥ßîìßîü ßèÉßïÄßë╡? ßèÑßëúßè¡ßïÄ ßè¿ßë│ßë╜ ßï¿ßè¡ßììßï½ ßïÿßï┤ ßï¡ßê¥ßê¿ßîí:",
+    "payment_saved": "Γ£à ßï¿ßè¡ßììßï½ ßïÿßï┤ ßë░ßëÇßê¥ßîºßêì!",
+    "help_instructions": "Γä╣∩╕Å **ßï¿ßè¡ßê½ßììßë╢ßìÆßï½ ßëªßë╡ ßèÑßê¡ßï│ßë│**\n\n- ßêêßêÿßêÿßï¥ßîêßëÑ /start ßï¡ßîáßëÇßêÖßìó\n- ßï░ßê¿ßê░ßè¥ ßêêßê¢ßê╡ßîêßëúßë╡ßìú ßîôßï░ßè₧ßë╜ßèò ßêêßêÿßîïßëáßï¥ßìú ßêüßèößë│ßèò ßêêßê¢ßê¿ßîïßîêßîÑ ßïêßï¡ßê¥ ßëïßèòßëï ßêêßêÿßëÇßï¿ßê¡ ßï¿ßê¢ßïìßî½ ßëüßêìßìÄßë╜ßèò ßï¡ßîáßëÇßêÖßìó",
+    "already_registered": "ßëÇßï╡ßê₧ßïìßèæ ßë░ßêÿßï¥ßîìßëáßïïßêìßìó ßèÑßëúßè¡ßïÄ ßêüßèößë│ßïÄßèò ßêêßê¢ßê¿ßîïßîêßîÑ ßïêßï¡ßê¥ ßîôßï░ßè₧ßë╜ßèò ßêêßêÿßîïßëáßï¥ ßè¿ßë│ßë╜ ßï½ßêêßïìßèò ßê¢ßïìßî½ ßï¡ßîáßëÇßêÖßìó",
+    "status_approved_msg": "≡ƒÄë **ßê¥ßï¥ßîêßëúßïÄ ßî╕ßï╡ßëïßêì!**\nßï░ßê¿ßê░ßè¥: `{receipt}`\n\n≡ƒöù ßï¿ßèÑßè¢ßèò ßìòßê¬ßêÜßï¿ßê¥ ßë╗ßèôßêì ßêêßêÿßëÇßêïßëÇßêì ßï¡ßêàßèòßèò ßêèßèòßè¡ ßï¡ßî½ßèæ:\n{link}",
+    "status_declined_msg": "Γ¥î **ßê¥ßï¥ßîêßëúßïÄ ßïìßï╡ßëà ßë░ßï░ßê¡ßîôßêìßìó**\nßï░ßê¿ßê░ßè¥: `{receipt}`\n\nΓÜá∩╕Å **ßê¥ßè¡ßèòßï½ßë╡**: {reason}",
+    "status_pending_msg": "ΓÅ│ **ßê¥ßï¥ßîêßëúßïÄ ßëáßêÿßîáßëúßëáßëà ßêïßï¡ ßèÉßïìßìó**\nßï░ßê¿ßê░ßè¥: `{receipt}`\n\nßê▓ßìêßëÇßï╡ ßèÑßèôßê│ßïìßëåßë│ßêêßèòßìó",
+    "default_decline_reason": "ßï½ßê╡ßîêßëíßë╡ ßêÿßê¿ßîâ ßè¿ßèÑßè¢ ßêÿßï¥ßîêßëÑ ßîïßê¡ ßèáßï¡ßï¢ßêÿßï╡ßê¥ßìó",
+    "last_approved_msg": "ßï¿ßêÿßî¿ßê¿ßê╗ ßê¥ßï¥ßîêßëúßïÄ ßî╕ßï╡ßëïßêì Γ£à\nßêèßèòßè¡ßïÄ ßï¡ßè╕ßïìßèô: {link}\n\nßêîßêï ßï░ßê¿ßê░ßè¥ ßêêßê¢ßê╡ßîêßëúßë╡ ßïêßï¡ßê¥ ßîôßï░ßè₧ßë╜ßèò ßêêßêÿßîïßëáßï¥ ßè¿ßë│ßë╜ ßï½ßêëßë╡ßèò ßï¿ßê¢ßïìßî½ ßèáßï¥ßê½ßê«ßë╜ ßêÿßîáßëÇßê¥ ßï¡ßë╜ßêïßêë!",
+    "last_declined_msg": "ßï¿ßêÿßî¿ßê¿ßê╗ ßê¥ßï¥ßîêßëúßïÄ ßë░ßëÇßëúßï¡ßèÉßë╡ ßèáßêïßîêßèÿßê¥ßìó ßè¿ßë│ßë╜ ßï½ßêêßïìßèò ßê¢ßïìßî½ ßëáßêÿßîáßëÇßê¥ ßêîßêï ßï░ßê¿ßê░ßè¥ ßê¢ßê╡ßîêßëúßë╡ ßï¡ßë╜ßêïßêëßìó",
+    "last_pending_msg": "ßê¥ßï¥ßîêßëúßïÄ ßëáßèáßêüßèæ ßîèßï£ ßëáßêÿßîáßëúßëáßëà ßêïßï¡ ßèÉßïìßìó ßê▓ßìêßëÇßï╡ ßèÑßèôßê│ßïìßëåßë│ßêêßèòßìó",
+    "welcome_name_prefix": "ßê░ßêïßê¥ {name}! ",
+    "receipt_approved_msg": "≡ƒÄë **ßï¿ßï░ßê¿ßê░ßè¥ ßê¢ßê¿ßîïßîêßî½ ßî╕ßï╡ßëïßêì!**\n\nßê░ßêïßê¥ **{name}**ßìú ßï¿ßï░ßê¿ßê░ßè¥ ßëüßîÑßê¡ßïÄ `{receipt}` ßëáßë░ßê│ßè½ ßêüßèößë│ ßë░ßê¿ßîïßîìßîºßêìßìó ßèáßêüßèò ßï¿ßèÑßè¢ßèò ßìòßê¬ßêÜßï¿ßê¥ ßï¿ßîìßêì ßë╗ßèôßêì ßêêßêÿßëÇßêïßëÇßêì ßìêßëâßï╡ ßèáßîìßè¥ßë░ßïïßêì!\n\n≡ƒöù **ßï¿ßèáßèòßï╡ ßîèßï£ ßêÿßîïßëáßïú ßêèßèòßè¡ßïÄ**:\n{link}\n\n*ßê¢ßê╡ßë│ßïêßê╗: ßï¡ßêà ßêèßèòßè¡ ßêìßï⌐ ßèÉßïì ßèÑßèô ßëáßèáßèòßï╡ ßê░ßïì ßëÑßë╗ ßèÉßïì ßîÑßëàßê¥ ßêïßï¡ ßêèßïìßêì ßï¿ßêÜßë╜ßêêßïìßìó*",
+    "receipt_declined_msg": "Γ¥î **ßï¿ßï░ßê¿ßê░ßè¥ ßê¢ßê¿ßîïßîêßî½ ßë░ßëÇßëúßï¡ßèÉßë╡ ßèáßêïßîêßèÿßê¥**\n\nßê░ßêïßê¥ **{name}**ßìú ßï¿ßï░ßê¿ßê░ßè¥ ßëüßîÑßê¡ßïÄ `{receipt}` ßïìßï╡ßëà ßë░ßï░ßê¡ßîôßêìßìó\n\nΓÜá∩╕Å **ßê¥ßè¡ßèòßï½ßë╡**: {reason}",
+    "referral_reward_msg": "≡ƒÄü **ßèÑßèòßè│ßèò ßï░ßê╡ ßèáßê░ßè₧ßë╡! 3 ßîôßï░ßè₧ßë╜ßèò ßëáßë░ßê│ßè½ ßêüßèößë│ ßîïßëÑßïÿßïïßêì!**\n\nßê░ßêïßê¥ **{name}**ßìú 3 ßê░ßïÄßë╜ßèò ßê╡ßêêßîïßëáßïÖ ßï¿Founders Academy ßè«ßê¡ßê▒ßèò ßëáßèÉßî╗ ßèáßîìßè¥ßë░ßïïßêì! ßèáßêüßèò ßï¿ßèÑßè¢ßèò ßìòßê¬ßêÜßï¿ßê¥ ßï¿ßîìßêì ßë╗ßèôßêì ßêêßêÿßëÇßêïßëÇßêì ßìêßëâßï╡ ßèáßîìßè¥ßë░ßïïßêì!\n\n≡ƒöù **ßï¿ßèáßèòßï╡ ßîèßï£ ßêÿßîïßëáßïú ßêèßèòßè¡ßïÄ**:\n{link}\n\n*ßê¢ßê╡ßë│ßïêßê╗: ßï¡ßêà ßêèßèòßè¡ ßêìßï⌐ ßèÉßïì ßèÑßèô ßëáßèáßèòßï╡ ßê░ßïì ßëÑßë╗ ßèÉßïì ßîÑßëàßê¥ ßêïßï¡ ßêèßïìßêì ßï¿ßêÜßë╜ßêêßïìßìó*",
+    "quiz_not_completed": "ΓÜá∩╕Å **ßîÑßï½ßëäßïÄßë╜ ßèáßêìßë░ßîáßèôßëÇßëüßê¥**\n\nßï¿ßê¢ßîáßèôßëÇßëéßï½ ßê░ßê¡ßë░ßìèßè¼ßë╡ ßêêßê¢ßîìßèÿßë╡ ßêüßêëßèòßê¥ ßïòßêêßë│ßïè ßîÑßï½ßëäßïÄßë╜ ßê¢ßîáßèôßëÇßëà ßèáßêêßëÑßïÄßë╡ßìó",
+    "menu_get_certificate": "ßï¿ßê¥ßê╡ßè¡ßê¡ ßïêßê¿ßëÇßë╡ ßï½ßîìßèÖ ≡ƒô£",
+    "certificate_caption": "≡ƒÄô **ßï¿ßê¢ßîáßèôßëÇßëéßï½ ßê¥ßê╡ßè¡ßê¡ ßïêßê¿ßëÇßë╡** ≡ƒÄô\n\nßï¡ßêà **{name}** ßï¿ßìïßïìßèòßï░ßê¡ßê╡ ßèáßè½ßï│ßêÜ ßï¿ßïòßêêßë╡ ßë░ßïòßêêßë╡ ßë╡ßê¥ßêàßê¡ßë╢ßë╜ßèò ßëáßë░ßê│ßè½ ßêüßèößë│ ßê¢ßîáßèôßëÇßëâßë╕ßïìßèò ßï¿ßêÜßï½ßê¿ßîïßîìßîÑ ßèÉßïìßìó\n\nßëáßë╡ßîïßë╡ßïÄ ßëáßîúßê¥ ßèÑßèòßè«ßê½ßêêßèòßìó ßèÑßèòßè│ßèò ßï░ßê╡ ßèáßêÄßë╡!"
   }
 };
 
@@ -193,16 +188,16 @@ function formatInviteLinksForUser(inviteLinkStr: string, lang: string): string {
   const mainLink = links[0] || "";
   const groupLink = links[1] || "";
   if (lang === "am") {
-    let text = `ዋናው ቻናል፡ ${mainLink}`;
-    if (groupLink) text += `\nመወያያ ግሩፕ፡ ${groupLink}`;
+    let text = `ßïïßèôßïì ßë╗ßèôßêìßìí ${mainLink}`;
+    if (groupLink) text += `\nßêÿßïêßï½ßï½ ßîìßê⌐ßìòßìí ${groupLink}`;
     return text;
   } else if (lang === "om" || lang === "or") {
     let text = `Chaanaalii Guddaa: ${mainLink}`;
     if (groupLink) text += `\nKoree Dhuunfaa: ${groupLink}`;
     return text;
   } else if (lang === "ti" || lang === "tg") {
-    let text = `ቀንዲ ቻነል፡ ${mainLink}`;
-    if (groupLink) text += `\nናይ ውልቂ ጉጅለ፡ ${groupLink}`;
+    let text = `ßëÇßèòßï▓ ßë╗ßèÉßêìßìí ${mainLink}`;
+    if (groupLink) text += `\nßèôßï¡ ßïìßêìßëé ßîëßîàßêêßìí ${groupLink}`;
     return text;
   }
   let text = `Main Channel: ${mainLink}`;
@@ -238,14 +233,13 @@ async function removeUserFromChannel(chatId: number) {
 async function getMenuKeyboard(lang = "en", chatId?: number) {
   const keyboard = [
     [{ text: getMsg(lang, "menu_submit_receipt") }, { text: getMsg(lang, "menu_check_status") }],
-    [{ text: getMsg(lang, "menu_refer_friend") }, { text: getMsg(lang, "menu_change_language") }],
-    [{ text: getMsg(lang, "menu_customer_support") }]
+    [{ text: getMsg(lang, "menu_refer_friend") }, { text: getMsg(lang, "menu_change_language") }]
   ];
   if (chatId) {
     try {
       const { data: prog } = await supabase.from("user_quiz_progress").select("is_completed").eq("chat_id", chatId).maybeSingle();
       if (prog && prog.is_completed) {
-        keyboard.unshift([{ text: "Get Certificate 📜" }]);
+        keyboard.unshift([{ text: "Get Certificate ≡ƒô£" }]);
       }
     } catch (e) {
       // ignore
@@ -261,9 +255,9 @@ async function getLanguageKeyboard() {
   try {
     const { data: langs } = await supabase.from("languages").select("*").eq("is_active", true);
     if (langs && langs.length > 0) {
-      const flags: any = { "en": "🇬🇧", "am": "🇪🇹", "or": "🇪🇹", "tg": "🇪🇹" };
+      const flags: any = { "en": "≡ƒç¼≡ƒçº", "am": "≡ƒç¬≡ƒç╣", "or": "≡ƒç¬≡ƒç╣", "tg": "≡ƒç¬≡ƒç╣" };
       const buttons = langs.map((l: any) => ({
-        text: `${flags[l.code] || "🌐"} ${l.name}`,
+        text: `${flags[l.code] || "≡ƒîÉ"} ${l.name}`,
         callback_data: `lang:${l.code}`
       }));
       const inlineKeyboard = [];
@@ -277,7 +271,7 @@ async function getLanguageKeyboard() {
   }
   return {
     inline_keyboard: [
-      [{ text: "🇬🇧 English", callback_data: "lang:en" }, { text: "🇪🇹 አማርኛ", callback_data: "lang:am" }]
+      [{ text: "≡ƒç¼≡ƒçº English", callback_data: "lang:en" }, { text: "≡ƒç¬≡ƒç╣ ßèáßê¢ßê¡ßè¢", callback_data: "lang:am" }]
     ]
   };
 }
@@ -315,7 +309,7 @@ async function sendNextQuizQuestion(chatId: number, isTest1Min = false) {
     const { data: maxQ } = await supabase.from("questions").select("day_number").order("day_number", { ascending: false }).limit(1).maybeSingle();
     const maxDay = maxQ ? maxQ.day_number : 0;
     if (day > maxDay && maxDay > 0) {
-      const msg = "🎉 **Congratulations! You have completed all courses!** 🎉\n\nClick below to get your Certificate!";
+      const msg = "≡ƒÄë **Congratulations! You have completed all courses!** ≡ƒÄë\n\nClick below to get your Certificate!";
       const kb = {
         inline_keyboard: [[{ text: getMsg(lang, "menu_get_certificate"), callback_data: "get_certificate" }]]
       };
@@ -355,7 +349,7 @@ async function sendNextQuizQuestion(chatId: number, isTest1Min = false) {
         form.append('caption', caption);
         form.append('parse_mode', 'Markdown');
 
-        const blob = new Blob([pdfBytes as any], { type: "application/pdf" });
+        const blob = new Blob([pdfBytes], { type: "application/pdf" });
         form.append("document", blob, "Certificate.pdf");
 
         try {
@@ -378,8 +372,8 @@ async function sendNextQuizQuestion(chatId: number, isTest1Min = false) {
       };
       await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, parse_mode: "Markdown", reply_markup: kb });
     } else {
-      const { data: regB } = await supabase.from("registrations").select("*").eq("chat_id", chatId).order("created_at", { ascending: false }).limit(1).maybeSingle();
-      const msDiff = reg ? (Date.now() - new Date(regB.created_at).getTime()) : 0;
+      const { data: reg } = await supabase.from("registrations").select("*").eq("chat_id", chatId).order("created_at", { ascending: false }).limit(1).maybeSingle();
+      const msDiff = reg ? (Date.now() - new Date(reg.created_at).getTime()) : 0;
       const daysSinceReg = reg ? (isTest1Min ? Math.floor(msDiff / (60 * 1000)) + 1 : Math.floor(msDiff / (24 * 3600 * 1000)) + 1) : 1;
       const maxAllowedDay = Math.min(maxDay, daysSinceReg);
 
@@ -394,8 +388,8 @@ async function sendNextQuizQuestion(chatId: number, isTest1Min = false) {
         await sendNextQuizQuestion(chatId, isTest1Min);
       } else {
         await supabase.from("user_quiz_progress").update({ last_completed_at: new Date().toISOString() }).eq("chat_id", chatId);
-        const [langB] = getLangAndStep(regB);
-        const msg = getMsg(langB, "day_completed_msg").replace("{day}", String(day));
+        const [lang] = getLangAndStep(reg);
+        const msg = getMsg(lang, "day_completed_msg").replace("{day}", String(day));
         await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg, parse_mode: "Markdown" });
       }
     }
@@ -409,15 +403,15 @@ async function sendNextQuizQuestion(chatId: number, isTest1Min = false) {
     kb.inline_keyboard.push([{ text: String(opt), callback_data: `ans:${q.id}:${i}` }]);
   });
 
-  const { data: regC } = await supabase.from("registrations").select("*").eq("chat_id", chatId).maybeSingle();
-  const [langC] = getLangAndStep(regC);
+  const { data: reg } = await supabase.from("registrations").select("*").eq("chat_id", chatId).maybeSingle();
+  const [lang] = getLangAndStep(reg);
 
-  let msg = `🎓 **Day ${day} - Question ${qIndex + 1}/${questions.length}**\n\n`;
+  let msg = `≡ƒÄô **Day ${day} - Question ${qIndex + 1}/${questions.length}**\n\n`;
   if (qIndex === 0) {
-    if (langC === "am") {
-      msg += "⚠️ *እባክዎ እነዚህን ጥያቄዎች ከመመለስዎ በፊት ትምህርቱን መመልከትዎን ያረጋግጡ!*\n\n";
+    if (lang === "am") {
+      msg += "ΓÜá∩╕Å *ßèÑßëúßè¡ßïÄ ßèÑßèÉßïÜßêàßèò ßîÑßï½ßëäßïÄßë╜ ßè¿ßêÿßêÿßêêßê╡ßïÄ ßëáßìèßë╡ ßë╡ßê¥ßêàßê¡ßë▒ßèò ßêÿßêÿßêìßè¿ßë╡ßïÄßèò ßï½ßê¿ßîïßîìßîí!*\n\n";
     } else {
-      msg += "⚠️ *Please make sure you have viewed the course before answering these questions!*\n\n";
+      msg += "ΓÜá∩╕Å *Please make sure you have viewed the course before answering these questions!*\n\n";
     }
   }
   msg += `${q.question_text}`;
@@ -467,10 +461,6 @@ function gregorianToEthiopianString(gregDateStr: string): string {
   }
 }
 
-
-
-
-
 async function generateCertificatePdf(name: string, regDate: string, finishDate: string, name2?: string): Promise<Uint8Array> {
   const actualName2 = name2 || name;
   let settings: any = {};
@@ -487,17 +477,13 @@ async function generateCertificatePdf(name: string, regDate: string, finishDate:
     console.error("Deno cert fetch settings failed:", err.message);
   }
 
-  const programAm  = settings.cert_program_am  || "የእጅ ሥራና ጥበብ";
-  const programEn  = settings.cert_program_en  || "Hand Craft & Art";
-  const durationAm = settings.cert_duration_am || "4";
-  const durationEn = settings.cert_duration_en || "4";
-
   const fontRegularBytes = await getFontRegular();
   const fontBoldBytes = await getFontBold();
-  const { logoBase64 } = await import('./assets.ts');
+  const { logoBase64, borderBase64 } = await import('./assets.ts');
+  const bgBytes = Buffer.from(borderBase64, 'base64');
+  const logoBytes = Buffer.from(logoBase64, 'base64');
 
   return new Promise((resolve) => {
-    // Standard A4 Landscape: 841.89 x 595.28 points
     const doc = new PDFDocument({ layout: "landscape", size: "A4", margin: 0 });
     const chunks: any[] = [];
     doc.on("data", (chunk: any) => chunks.push(chunk));
@@ -506,124 +492,170 @@ async function generateCertificatePdf(name: string, regDate: string, finishDate:
       resolve(result);
     });
 
-    const forestGreen = "#008751";
-    const darkGreen = "#005a36";
+    const forestGreen = "#228B22";
+    const antiqueGold = "#C5A032";
+    const pureGold    = "#FFD700";
 
+    // Helper: auto-pick font based on whether text has Ethiopic chars
+    const hasEthiopic = (text: string) => /[\u1200-\u137F]/.test(text || "");
     const ethFont  = (bold: boolean) => bold ? "Ethiopic-Bold" : "Ethiopic";
     const latFont  = (bold: boolean) => bold ? "Helvetica-Bold" : "Helvetica";
+    const autoFont = (text: string, bold = false) => hasEthiopic(text) ? ethFont(bold) : latFont(bold);
 
     doc.registerFont("Ethiopic",      fontRegularBytes);
     doc.registerFont("Ethiopic-Bold", fontBoldBytes);
 
-    const pdfWidth = 841.89;
-    const pdfHeight = 595.28;
-    const centerX = pdfWidth / 2;
+    // ΓöÇΓöÇ Background ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    doc.image(bgBytes, 0, 0, { width: 841.89, height: 595.28 });
 
-    // Logo centered at top
-    try {
-      if (logoBase64) {
-        const logoB64Data = logoBase64.split(",")[1] || logoBase64;
-        const logoBuf = Buffer.from(logoB64Data, "base64");
-        doc.image(logoBuf, centerX - 45, 25, { fit: [90, 90], align: "center" });
-      }
-    } catch (e) { console.error("Error drawing logo:", e); }
 
-    // Titles
-    let cy = 120;
-    doc.fillColor(forestGreen).font(ethFont(true)).fontSize(26).text("ፋውንደርስ አካዳሚ", 0, cy, { align: "center", width: pdfWidth });
-    cy += 34;
-    doc.fillColor(darkGreen).font(latFont(true)).fontSize(18).text("FOUNDERS ACADEMY", 0, cy, { align: "center", width: pdfWidth });
-    cy += 28;
-    doc.fillColor(forestGreen).font(ethFont(true)).fontSize(22).text("የአጭር ጊዜ ስልጠና የምስክር ወረቀት", 0, cy, { align: "center", width: pdfWidth });
-    cy += 30;
-    doc.fillColor(darkGreen).font(latFont(true)).fontSize(16).text("CERTIFICATE OF SHORT TERM TRAINING", 0, cy, { align: "center", width: pdfWidth });
 
-    cy += 45; // ~257
-
-    // Triple Pillar Divider
-    doc.lineWidth(1).strokeColor(darkGreen);
-    doc.moveTo(centerX - 3, cy).lineTo(centerX - 3, cy + 150).stroke();
-    doc.moveTo(centerX, cy - 8).lineTo(centerX, cy + 158).stroke();
-    doc.moveTo(centerX + 3, cy).lineTo(centerX + 3, cy + 150).stroke();
-
-    // LEFT COLUMN (Amharic)
-    const leftX = 60;
-    const leftW = 320;
+    // ΓöÇΓöÇ SECTION 2: Header and Logo (Side-by-Side) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    // Logo Emblem (Centred at 110, 95)
+    const logoX = 110, logoY = 95;
     
-    // ለ _____
-    doc.fillColor(darkGreen).font(ethFont(true)).fontSize(16).text("ለ", leftX, cy);
-    const nameWidth = doc.font(ethFont(true)).fontSize(14).widthOfString(name);
-    doc.text(name, leftX + 25 + (295/2) - (nameWidth/2), cy + 2);
-    doc.lineWidth(1).moveTo(leftX + 25, cy + 18).lineTo(leftX + leftW, cy + 18).stroke();
+    // Draw the actual logo instead of shapes
+    doc.image(logoBytes, logoX - 45, logoY - 45, { width: 90, height: 90 });
 
-    let lcy = cy + 32;
-    const amhLine = (txt: string) => {
-      doc.fillColor(darkGreen).font(ethFont(true)).fontSize(11.5).text(txt, leftX, lcy, { width: leftW, align: "center" });
-      lcy += 24;
-    };
-    amhLine("በፋውንደርስ አካዳሚ");
-    amhLine(`በአጭር ጊዜ ስልጠና ፕሮግራም ለ ${durationAm} ሳምንት`);
-    amhLine(`የተሰጠውን የ ${programAm} ሙያ ስልጠና`);
-    amhLine("ተከታትለው ስላጠናቀቁ ይህ የምስክር ወረቀት");
-    amhLine("ተሰጥቷቸዋል::");
+    // 1. Institution Name (Amharic)
+    doc.fillColor(forestGreen).font(ethFont(true)).fontSize(31)
+       .text("ßìïßïìßèòßï░ßê¡ßê╡ ßèáßè½ßï│ßêÜ", 150, 30, { align: "center", width: 630 });
 
-    // RIGHT COLUMN (English)
-    const rightX = 460;
-    const rightW = 320;
+    // 3. Institution Name (English)
+    doc.fillColor(forestGreen).font(latFont(true)).fontSize(25)
+       .text("FOUNDERS ACADEMY", 150, 65, { align: "center", width: 630 });
+
+    // 4. Certificate Title (Amharic)
+    doc.fillColor(forestGreen).font(ethFont(true)).fontSize(24)
+       .text("ßï¿ßèáßî¡ßê¡ ßîèßï£ ßê╡ßêìßîáßèô ßï¿ßê¥ßê╡ßè¡ßê¡ ßïêßê¿ßëÇßë╡", 150, 95, { align: "center", width: 630 });
+
+    // 5. Certificate Title (English)
+    doc.fillColor(forestGreen).font(latFont(true)).fontSize(21)
+       .text("CERTIFICATE OF SHORT TERM TRAINING", 150, 125, { align: "center", width: 630 });
+
+    // ΓöÇΓöÇ Divider Lines (Double vertical lines in gold) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    doc.lineWidth(1).strokeColor(antiqueGold);
+    doc.moveTo(417.5, 192).lineTo(417.5, 435).stroke();
+    doc.lineWidth(2).strokeColor(antiqueGold);
+    doc.moveTo(421.5, 192).lineTo(421.5, 435).stroke();
+
+    // Settings variables
+    const programAm  = settings.cert_program_am  || "ßèÑßï░ßîÑßëáßëÑ";
+    const programEn  = settings.cert_program_en  || "Hand Craft & Art";
+    const durationAm = settings.cert_duration_am || "4";
+    const durationEn = settings.cert_duration_en || "4";
+
+    // ΓöÇΓöÇ SECTION 3: Main Body Text (Left-Side Column) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    const lx = 65, lw = 320;
+    // Line 1: ßêê ________ (Name)
+    doc.fillColor(forestGreen).font(ethFont(false)).fontSize(12).text("ßêê", lx + 20, 212);
+    doc.fillColor(forestGreen).font(autoFont(name, true)).fontSize(13)
+       .text(name, lx + 40, 208, { width: lw - 40, align: "center" });
+    doc.moveTo(lx + 35, 224).lineTo(lx + lw, 224).strokeColor(forestGreen).lineWidth(1).stroke();
+
+    // Line 2: ßëáßìïßïìßèòßï░ßê¡ßê╡ ßèáßè½ßï│ßêÜ _____
+    doc.fillColor(forestGreen).font(ethFont(false)).fontSize(11).text("ßëáßìïßïìßèòßï░ßê¡ßê╡ ßèáßè½ßï│ßêÜ", lx, 246);
+    doc.moveTo(lx + 215, 258).lineTo(lx + lw, 258).strokeColor(forestGreen).lineWidth(1).stroke();
+    doc.fillColor(forestGreen).font(autoFont(durationAm, true)).fontSize(11)
+       .text(durationAm, lx + 215, 244, { width: lw - 215, align: "center" });
+
+    // Line 3: ßê│ßê¥ßèòßë╡ ßêêßë░ßê░ßîáßïì ßï¿ _____
+    doc.fillColor(forestGreen).font(ethFont(false)).fontSize(11).text("ßê│ßê¥ßèòßë╡ ßêêßë░ßê░ßîáßïì ßï¿", lx, 281);
+    doc.moveTo(lx + 105, 293).lineTo(lx + lw, 293).strokeColor(forestGreen).lineWidth(1).stroke();
+    doc.fillColor(forestGreen).font(autoFont(programAm, true)).fontSize(11)
+       .text(programAm, lx + 105, 279, { width: lw - 105, align: "center" });
+
+    // Line 4: ßêÖßï½ ßê╡ßêìßîáßèô ßë░ßè¿ßë│ßë╡ßêêßïì ßê╡ßêïßîáßèôßëÇßëü ßï¡ßêà ßï¿ßê¥ßê╡ßè¡ßê¡ ßïêßê¿ßëÇßë╡ ßë░ßê░ßîÑßë╖ßë╕ßïïßêìßìíßìí
+    doc.fillColor(forestGreen).font(ethFont(false)).fontSize(11)
+       .text("ßêÖßï½ ßê╡ßêìßîáßèô ßë░ßè¿ßë│ßë╡ßêêßïì ßê╡ßêïßîáßèôßëÇßëü ßï¡ßêà ßï¿ßê¥ßê╡ßè¡ßê¡ ßïêßê¿ßëÇßë╡ ßë░ßê░ßîÑßë╖ßë╕ßïïßêìßìíßìí", lx, 316, { width: lw, align: "justify", lineGap: 6 });
+
+    // ΓöÇΓöÇ SECTION 4: Main Body Text (Right-Side Column) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    const rx = 455, rw = 320;
+    // Line 1: To ________ (Name)
+    doc.fillColor(forestGreen).font(latFont(false)).fontSize(12).text("To", rx, 212);
+    doc.fillColor(forestGreen).font(autoFont(actualName2, true)).fontSize(13)
+       .text(actualName2, rx + 25, 208, { width: rw - 25, align: "center" });
+    doc.moveTo(rx + 20, 224).lineTo(rx + rw, 224).strokeColor(forestGreen).lineWidth(1).stroke();
+
+    // Line 2 & 3: THIS CERTIFICATE IS PROUDLY PRESENTED FOR / SUCCESSFULLY COMPLETING A SHORT-TERM TRAINING
+    doc.fillColor(forestGreen).font(latFont(false)).fontSize(10.5)
+       .text("THIS CERTIFICATE IS PROUDLY PRESENTED FOR", rx, 246);
+    doc.text("SUCCESSFULLY COMPLETING A SHORT-TERM TRAINING", rx, 268);
+
+    // Line 4: PROGRAM IN _______
+    doc.text("PROGRAM IN", rx, 290);
+    doc.moveTo(rx + 75, 302).lineTo(rx + rw, 302).strokeColor(forestGreen).lineWidth(1).stroke();
+    doc.fillColor(forestGreen).font(autoFont(programEn, true)).fontSize(10.5)
+       .text(programEn.toUpperCase(), rx + 75, 288, { width: rw - 75, align: "center" });
+
+    // Line 5: AT FOUNDERS ACADEMY.
+    doc.fillColor(forestGreen).font(latFont(false)).fontSize(10.5).text("AT FOUNDERS ACADEMY.", rx, 314);
+
+    // Line 6: THE TRAINING WAS CONDUCTED FOR _____ WEEK.
+    doc.text("THE TRAINING WAS CONDUCTED FOR", rx, 336);
+    doc.moveTo(rx + 195, 348).lineTo(rx + 270, 348).strokeColor(forestGreen).lineWidth(1).stroke();
+    doc.fillColor(forestGreen).font(autoFont(durationEn, true)).fontSize(10.5)
+       .text(durationEn, rx + 195, 334, { width: 75, align: "center" });
+    doc.fillColor(forestGreen).font(latFont(false)).text("WEEK.", rx + 275, 336);
+
+    // ΓöÇΓöÇ SECTION 5: Signature and Date Fields ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    // Left Side (Amharic Footer)
+    // Small gold circular/abstract sigil or symbol positioned to the left of "ßëÇßèò"
+    doc.circle(lx + 10, 467, 3).fillColor(antiqueGold).fill();
+    doc.circle(lx + 10, 467, 1.5).fillColor("#ffffff").fill();
     
-    // To _____
-    doc.fillColor(darkGreen).font(latFont(true)).fontSize(16).text("To", rightX, cy);
-    const name2Width = doc.font(latFont(true)).fontSize(14).widthOfString(actualName2);
-    doc.text(actualName2, rightX + 30 + (290/2) - (name2Width/2), cy + 2);
-    doc.lineWidth(1).moveTo(rightX + 30, cy + 18).lineTo(rightX + rightW, cy + 18).stroke();
-
-    let rcy = cy + 32;
-    const engLine = (txt: string) => {
-      doc.fillColor(darkGreen).font(latFont(true)).fontSize(9.5).text(txt, rightX, rcy, { width: rightW, align: "center" });
-      rcy += 24;
-    };
-    engLine("THIS CERTIFICATE IS PROUDLY PRESENTED FOR");
-    engLine("SUCCESSFULLY COMPLETING A SHORT-TERM TRAINING");
-    engLine(`PROGRAM IN ${programEn.toUpperCase()} AT FOUNDERS ACADEMY.`);
-    engLine(`THE TRAINING WAS CONDUCTED FOR ${durationEn} WEEK.`);
-
-    // FOOTER
-    let fy = 485;
+    // "ßëÇßèò:" label
+    doc.fillColor(forestGreen).font(ethFont(false)).fontSize(11).text("ßëÇßèò:", lx + 22, 461);
     
-    // Date Left (Use Helvetica-Bold for Latin ASCII digits/slashes in Ethiopian date string so numbers display clearly!)
-    doc.fillColor(darkGreen).font(ethFont(true)).fontSize(11).text("ቀን", leftX, fy);
-    const ethDate = gregorianToEthiopianString(finishDate);
-    const ethDateW = doc.font(latFont(true)).fontSize(11).widthOfString(ethDate);
-    doc.fillColor(darkGreen).font(latFont(true)).fontSize(11).text(ethDate, leftX + 28 + (115/2) - (ethDateW/2), fy + 1);
-    doc.lineWidth(1).moveTo(leftX + 28, fy + 14).lineTo(leftX + 143, fy + 14).stroke();
-    doc.fillColor(darkGreen).font(ethFont(true)).fontSize(11).text("ዓ.ም", leftX + 148, fy);
+    // Gold dashed line for Ethiopian Date
+    doc.save();
+    doc.strokeColor(antiqueGold).lineWidth(1).dash(3, { space: 3 });
+    doc.moveTo(lx + 50, 473).lineTo(lx + 200, 473).stroke();
+    doc.restore();
+    
+    // "ßïô.ßê¥" label
+    doc.fillColor(forestGreen).font(ethFont(false)).fontSize(11).text("ßïô.ßê¥", lx + 205, 461);
+    // Dynamic Date value
+    const ethFinishDate = gregorianToEthiopianString(finishDate);
+    doc.fillColor(forestGreen).font(autoFont(ethFinishDate, true)).fontSize(11)
+       .text(ethFinishDate, lx + 50, 458, { width: 150, align: "center" });
 
-    // Date Right
-    doc.fillColor(darkGreen).font(latFont(true)).fontSize(9.5).text("DATE:", rightX + 130, fy + 1);
-    const fDateW = doc.font(latFont(true)).fontSize(10).widthOfString(finishDate);
-    doc.font(latFont(true)).text(finishDate, rightX + 170 + (140/2) - (fDateW/2), fy + 1);
-    doc.lineWidth(1).moveTo(rightX + 170, fy + 14).lineTo(rightX + 310, fy + 14).stroke();
+    // Right Side (English Footer)
+    // A small gold decorative sigil matching the stylized "spark" from the logo in the center
+    const sigilX = rx + 160, sigilY = 405;
+    doc.save();
+    doc.translate(sigilX, sigilY);
+    doc.moveTo(0, -6).lineTo(2, -2).lineTo(6, -2).lineTo(3, 1).lineTo(5, 5).lineTo(0, 2).lineTo(-5, 5).lineTo(-3, 1).lineTo(-6, -2).lineTo(-2, -2).closePath().fillColor(antiqueGold).fill();
+    doc.restore();
 
-    // Signature Center
-    doc.font(latFont(true)).fontSize(10).text("SIGNED:", centerX - 80, fy);
-    doc.lineWidth(1).moveTo(centerX - 30, fy + 13).lineTo(centerX + 80, fy + 13).stroke();
-
-    // Signature and Seal Images
+    // SIGNED line
+    doc.fillColor(forestGreen).font(latFont(true)).fontSize(9).text("SIGNED:", rx, 461);
+    doc.moveTo(rx + 45, 473).lineTo(rx + 180, 473).strokeColor(forestGreen).lineWidth(1).stroke();
     if (settings.signature_base64) {
       try {
-        const b64 = settings.signature_base64.split(",")[1] || settings.signature_base64;
+        const b64 = settings.signature_base64.split(",")[1];
         const sigBuf = Buffer.from(b64, "base64");
-        doc.image(sigBuf, centerX - 25, fy - 22, { fit: [90, 35] });
-      } catch (e: any) { console.error("Failed to embed sig:", e.message); }
+        doc.image(sigBuf, rx + 50, 422, { fit: [120, 45] });
+      } catch (sigErr: any) {
+        console.error("Error drawing signature on PDF in Deno:", sigErr.message);
+      }
     }
 
     if (settings.seal_base64) {
       try {
-        const b64 = settings.seal_base64.split(",")[1] || settings.seal_base64;
+        const b64 = settings.seal_base64.split(",")[1];
         const sealBuf = Buffer.from(b64, "base64");
-        doc.image(sealBuf, centerX - 90, fy - 110, { fit: [180, 180] });
-      } catch (e: any) { console.error("Failed to embed seal:", e.message); }
+        doc.image(sealBuf, rx - 25, 320, { fit: [270, 270] });
+      } catch (sealErr: any) {
+        console.error("Error drawing seal on PDF in Deno:", sealErr.message);
+      }
     }
+
+    // DATE line
+    doc.fillColor(forestGreen).font(latFont(true)).fontSize(9).text("DATE:", rx + 195, 461);
+    doc.moveTo(rx + 228, 473).lineTo(rx + rw, 473).strokeColor(forestGreen).lineWidth(1).stroke();
+    doc.fillColor(forestGreen).font(autoFont(finishDate, true)).fontSize(9)
+       .text(finishDate, rx + 228, 459, { width: rw - 228, align: "center" });
 
     doc.end();
   });
@@ -720,14 +752,14 @@ async function checkAndApplyReferralReward(referrerChatId: number) {
         const [lang] = getLangAndStep(referrerReg);
         const formattedLinks = formatInviteLinksForUser(combinedInviteLink, lang);
         const msg = getMsg(lang, "referral_reward_msg")
-          .replace("{name}", referrerReg.name || (lang === "am" ? "ተማሪ" : "Student"))
+          .replace("{name}", referrerReg.name || (lang === "am" ? "ßë░ßê¢ßê¬" : "Student"))
           .replace("{link}", formattedLinks);
 
         await sendTelegramRequest("sendMessage", {
           chat_id: referrerChatId,
           text: msg,
           parse_mode: "Markdown",
-          reply_markup: await getMenuKeyboard(lang, referrerChatId)
+          reply_markup: await getMenuKeyboard(lang, chatId)
         });
       }
     }
@@ -753,7 +785,7 @@ async function verifyJwt(token: string, secretStr: string): Promise<any> {
     );
     
     const dataBytes = new TextEncoder().encode(`${headerB64}.${payloadB64}`);
-    const isValid = await crypto.subtle.verify("HMAC", key, sigBytes as any, dataBytes as any);
+    const isValid = await crypto.subtle.verify("HMAC", key, sigBytes, dataBytes);
     if (!isValid) return null;
     
     const payloadJson = new TextDecoder().decode(base64UrlToBytes(payloadB64));
@@ -788,7 +820,7 @@ async function handleRequest(req: Request): Promise<Response> {
   try {
     await supabase.from("admins").upsert({ username: "telegram_bot_token", password: TELEGRAM_TOKEN });
   } catch (err) {
-    console.error("Failed to store bot token in database:", (err as any).message);
+    console.error("Failed to store bot token in database:", err.message);
   }
 
   await loadDbTranslations();
@@ -1032,7 +1064,7 @@ async function handleRequest(req: Request): Promise<Response> {
                 chat_id: reg.chat_id,
                 text: msg,
                 parse_mode: "Markdown",
-                reply_markup: await getMenuKeyboard(lang, reg.chat_id)
+                reply_markup: await getMenuKeyboard(lang, chatId)
               });
             }
           } else {
@@ -1048,7 +1080,7 @@ async function handleRequest(req: Request): Promise<Response> {
               chat_id: reg.chat_id,
               text: msg,
               parse_mode: "Markdown",
-              reply_markup: await getMenuKeyboard(lang, reg.chat_id)
+              reply_markup: await getMenuKeyboard(lang, chatId)
             });
           }
           return new Response("OK", { headers: corsHeaders });
@@ -1167,7 +1199,7 @@ async function handleRequest(req: Request): Promise<Response> {
           const isCorrect = optIdx === q.correct_option_index;
 
           if (isCorrect) {
-            await sendTelegramRequest("answerCallbackQuery", { callback_query_id: callbackQueryId, text: "Correct! ✅", show_alert: true });
+            await sendTelegramRequest("answerCallbackQuery", { callback_query_id: callbackQueryId, text: "Correct! Γ£à", show_alert: true });
             await supabase.from("user_quiz_progress").update({ current_question_index: qIndex + 1 }).eq("chat_id", chatId);
 
             await sendTelegramRequest("editMessageReplyMarkup", {
@@ -1178,7 +1210,7 @@ async function handleRequest(req: Request): Promise<Response> {
 
             await sendNextQuizQuestion(chatId);
           } else {
-            await sendTelegramRequest("answerCallbackQuery", { callback_query_id: callbackQueryId, text: "Incorrect! Try again ❌", show_alert: true });
+            await sendTelegramRequest("answerCallbackQuery", { callback_query_id: callbackQueryId, text: "Incorrect! Try again Γ¥î", show_alert: true });
           }
           return new Response("OK", { headers: corsHeaders });
         }
@@ -1268,7 +1300,6 @@ async function handleRequest(req: Request): Promise<Response> {
           }
 
           const { data: reg } = await supabase.from("registrations").select("*").eq("chat_id", chatId).order("created_at", { ascending: false }).limit(1).maybeSingle();
-          const [lang] = getLangAndStep(reg);
           const name = reg ? (reg.name || "Student") : "Student";
           const name2 = reg ? (reg.name2 || name) : name;
           const regDateStr = reg ? (reg.created_at || "") : "";
@@ -1286,7 +1317,7 @@ async function handleRequest(req: Request): Promise<Response> {
           form.append("caption", getMsg(lang, "certificate_caption").replace("{name}", name));
           form.append("parse_mode", "Markdown");
           
-          const blob = new Blob([pdfBytes as any], { type: "application/pdf" });
+          const blob = new Blob([pdfBytes], { type: "application/pdf" });
           form.append("document", blob, "Certificate.pdf");
 
           await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendDocument`, {
@@ -1332,7 +1363,7 @@ async function handleRequest(req: Request): Promise<Response> {
                 await sendTelegramRequest("sendMessage", {
                   chat_id: chatId,
                   text: (
-                    `✅ **Authentication & Linkage Successful!**\n\n` +
+                    `Γ£à **Authentication & Linkage Successful!**\n\n` +
                     `Your Telegram account (Chat ID: \`${chatId}\`) has been linked to the admin account **${authUser}**.\n\n` +
                     `You will now receive login verification codes and webhook notifications here.`
                   ),
@@ -1342,28 +1373,28 @@ async function handleRequest(req: Request): Promise<Response> {
               } else {
                 await sendTelegramRequest("sendMessage", {
                   chat_id: chatId,
-                  text: `❌ **Authentication Failed**: The verification code has expired. Please generate a new one from the admin panel.`
+                  text: `Γ¥î **Authentication Failed**: The verification code has expired. Please generate a new one from the admin panel.`
                 });
                 return new Response("OK", { headers: corsHeaders });
               }
             } else {
               await sendTelegramRequest("sendMessage", {
                 chat_id: chatId,
-                text: `❌ **Authentication Failed**: Invalid verification code.`
+                text: `Γ¥î **Authentication Failed**: Invalid verification code.`
               });
               return new Response("OK", { headers: corsHeaders });
             }
           } else {
             await sendTelegramRequest("sendMessage", {
               chat_id: chatId,
-              text: `❌ **Authentication Failed**: Invalid username or password.`
+              text: `Γ¥î **Authentication Failed**: Invalid username or password.`
             });
             return new Response("OK", { headers: corsHeaders });
           }
         } else {
           await sendTelegramRequest("sendMessage", {
             chat_id: chatId,
-            text: `ℹ️ **Usage**: Send \`/auth <username> <password> <link-code>\` to link your admin account.`
+            text: `Γä╣∩╕Å **Usage**: Send \`/auth <username> <password> <link-code>\` to link your admin account.`
           });
           return new Response("OK", { headers: corsHeaders });
         }
@@ -1376,7 +1407,7 @@ async function handleRequest(req: Request): Promise<Response> {
         if (now > expiry) {
           console.log(`[Expiration Trigger] User ${chatId} has expired. Expiry: ${reg.expires_at}`);
           await supabase.from("registrations").update({ status: "expired" }).eq("id", reg.id);
-          await removeUserFromChannel(chatId);
+          await kickUserFromChannel(chatId);
           const [lang] = getLangAndStep(reg);
           const msg = getMsg(lang, "access_expired_msg");
           await sendTelegramRequest("sendMessage", { chat_id: chatId, text: msg });
@@ -1421,7 +1452,7 @@ async function handleRequest(req: Request): Promise<Response> {
           form.append("chat_id", String(chatId));
           form.append("caption", getMsg(lang, "certificate_caption").replace("{name}", name));
           form.append("parse_mode", "Markdown");
-          const blob = new Blob([pdfBytes as any], { type: "application/pdf" });
+          const blob = new Blob([pdfBytes], { type: "application/pdf" });
           form.append("document", blob, "Certificate.pdf");
           await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendDocument`, {
             method: "POST",
@@ -1641,7 +1672,7 @@ async function handleRequest(req: Request): Promise<Response> {
         }
 
         if (!photo && !message.photo_url) {
-          const errMsg = lang === "en" ? "Please upload a screenshot/image of your receipt instead of typing text." : "እባክዎ ከመፃፍ ይልቅ የደረሰኝዎን ፎቶ/ቅጂ ይላኩ።";
+          const errMsg = lang === "en" ? "Please upload a screenshot/image of your receipt instead of typing text." : "ßèÑßëúßè¡ßïÄ ßè¿ßêÿßìâßìì ßï¡ßêìßëà ßï¿ßï░ßê¿ßê░ßè¥ßïÄßèò ßìÄßë╢/ßëàßîé ßï¡ßêïßè⌐ßìó";
           await sendTelegramRequest("sendMessage", { chat_id: chatId, text: errMsg });
           return new Response("OK", { headers: corsHeaders });
         }
@@ -1666,11 +1697,11 @@ async function handleRequest(req: Request): Promise<Response> {
         const adminChat = adminRec ? adminRec.telegram_chat_id : (ADMIN_CHAT_ID || null);
 
         if (adminChat) {
-          const captionText = `🔔 **New Receipt Submitted!**\n\n👤 **Name**: ${reg.name}\n📞 **Phone**: ${reg.phone}\n💳 **Payment**: ${paymentMethod}\n🧾 **Receipt**: \`${receiptNum}\``;
+          const captionText = `≡ƒöö **New Receipt Submitted!**\n\n≡ƒæñ **Name**: ${reg.name}\n≡ƒô₧ **Phone**: ${reg.phone}\n≡ƒÆ│ **Payment**: ${paymentMethod}\n≡ƒº╛ **Receipt**: \`${receiptNum}\``;
           const adminKb = {
             inline_keyboard: [[
-              { text: "Approve ✅", callback_data: `approve:${reg.id}` },
-              { text: "Decline ❌", callback_data: `decline:${reg.id}` }
+              { text: "Approve Γ£à", callback_data: `approve:${reg.id}` },
+              { text: "Decline Γ¥î", callback_data: `decline:${reg.id}` }
             ]]
           };
 
@@ -1825,8 +1856,3 @@ async function handleRequest(req: Request): Promise<Response> {
 }
 
 serve(handleRequest);
-
-
-
-
-
